@@ -1,0 +1,12 @@
+Material My Material : Common/MatDefs/Misc/Unshaded.j3md {
+     MaterialParameters {
+        VertexColor : true
+        UseInstancing : false
+     }
+    AdditionalRenderState {
+      Wireframe Off
+      DepthTest Off
+      ColorWrite On
+        DepthWrite On
+    }
+}
