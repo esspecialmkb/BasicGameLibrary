@@ -6,6 +6,7 @@
 package UI;
 
 import com.jme3.material.Material;
+import com.jme3.math.Vector2f;
 
 /**
  *
@@ -25,6 +26,14 @@ public class UIRoot extends UIElement{
         // Iterate through child nodes and assign mats
         public void validate(){
             this.assignMaterial(mat);
+        }
+        
+        // Iterate through child nodes
+        @Override
+        public void collideWidth(int x, int y){
+            for(UIElement child :children){
+                child.collideWidth(x, y);
+            }
         }
         
     }
