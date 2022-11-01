@@ -30,9 +30,9 @@ public class UIRoot extends UIElement{
         
         // Iterate through child nodes
         @Override
-        public void collideWidth(int x, int y){
+        public void collideWith(int x, int y){
             for(UIElement child :children){
-                child.collideWidth(x, y);
+                child.collideWith(x, y);
             }
         }
         
