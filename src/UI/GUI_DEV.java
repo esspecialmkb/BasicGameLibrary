@@ -2,17 +2,12 @@
 
 package UI;
 
-import static UI.MeshElement.MeshBufferColor;
-import static UI.MeshElement.MeshBufferIndex;
-import static UI.MeshElement.MeshBufferNormal;
-import static UI.MeshElement.MeshBufferVertex;
 import static UI.UIRoot.UI_BUTTON_HEIGHT;
 import static UI.UIRoot.UI_BUTTON_WIDTH;
 import static UI.UIRoot.UI_PANEL_HEIGHT;
 import static UI.UIRoot.UI_PANEL_WIDTH;
 import static UI.UIRoot.UI_SCROLLBAR_HEIGHT;
 import static UI.UIRoot.UI_SCROLLBAR_WIDTH;
-import mygame.*;
 import com.jme3.app.SimpleApplication;
 import com.jme3.font.BitmapFont;
 import com.jme3.font.BitmapText;
@@ -20,11 +15,8 @@ import com.jme3.font.Rectangle;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector2f;
-import com.jme3.math.Vector3f;
 import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.Geometry;
-import com.jme3.scene.Mesh;
-import com.jme3.scene.Node;
 import com.jme3.scene.shape.Box;
 import java.util.ArrayList;
 

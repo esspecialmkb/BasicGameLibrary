@@ -75,12 +75,17 @@ public class UIElement{
     }
 
     // We will need to test if the object was clicked
-    protected void collideWith(int x, int y){
+    protected boolean collideWith(int x, int y){
+        // Use the position and size of the element to determine collision
         if(x>this.x && x< (this.x + this.width)){
             if(y>this.y && y< (this.y + this.height)){
-                System.out.println(this.name + " Collide With");
+                //System.out.println(this.name + " Collide With");
+                // Return true if we have detected a collision
+                return true;
             }
         }
+        // Return false if no collision
+        return false;
     }
     
     protected String collideWithResponse(int x, int y){
