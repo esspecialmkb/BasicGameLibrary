@@ -158,16 +158,19 @@ public class UIElement{
         // Recursively call all children first
         if(children != null){
             for(UIElement c : children){
-                assignUIHub(newHub);
+                c.assignUIHub(newHub);
             }
         }
         
         // Assign uiHub
-        this.ui.post(0, this.id, "New UIHub assign: " + newHub);
-        int pingCount = this.ui.ping(0);
-        if(pingCount > 0){
-            // Grab messages
+        if(this.ui != null){
+            this.ui.post(0, this.id, "New UIHub assign: " + newHub);
+            int pingCount = this.ui.ping(0);
+            if(pingCount > 0){
+                // Grab messages
+            }
         }
+        
         this.ui = newHub;
         this.ui.post(0, this.id, name);
     }
@@ -180,8 +183,10 @@ public class UIElement{
         // Recursively call all children...
         if(children != null){
             for(UIElement c : children){
-                
+                c.onUpdate();
             }
         }
+        // Check UIHub for messages
+        ui.ping(0);
     }
 }

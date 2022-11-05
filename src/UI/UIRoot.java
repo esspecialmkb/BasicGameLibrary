@@ -34,9 +34,14 @@ public class UIRoot extends UIElement{
         // Iterate through child nodes and assign mats
         public void validate(){
             this.assignMaterial(mat);
+            this.assignUIHub(ui);
         }
         
         // Iterate through child nodes
+        /*
+        Hub topic ids
+        1 - mouse interaction
+        */
         @Override
         public boolean collideWith(int x, int y){
             // Cache the result
@@ -52,7 +57,8 @@ public class UIRoot extends UIElement{
                             result = hoverChild.collideWith(x, y);
                             
                             if(result){
-                                System.out.println(this.name + " Collide With " + hoverChild.name);
+                                //System.out.println(this.name + " Collide With " + hoverChild.name);
+                                ui.post(1, hoverChild.id, hoverChild.name + "::MOUSEOVER");
                                 return true;
                             }
                         }
@@ -64,7 +70,8 @@ public class UIRoot extends UIElement{
                 
                 if(result){
                     if(isHoverNotify == false){
-                        System.out.println(this.name + " Hover With " + lastHover.name);
+                        //System.out.println(this.name + " Hover With " + lastHover.name);
+                        ui.post(1, lastHover.id, lastHover.name + "::HOVER");
                         isHoverNotify = true;
                     }
                     return true;
@@ -84,7 +91,8 @@ public class UIRoot extends UIElement{
                     isHover = true;
                     lastMouseX = x;
                     lastMouseY = y;
-                    System.out.println(this.name + " Collide With " + lastHover.name);
+                    //System.out.println(this.name + " Collide With " + lastHover.name);
+                    ui.post(1, lastHover.id, lastHover.name + "::MOUSEOVER");
                     return true;
                 }
             }
@@ -94,5 +102,7 @@ public class UIRoot extends UIElement{
             isHover = false;
             return false;
         }
-        
+        public void uiTick(){
+            this.ui.onUpdate();
+        }
     }

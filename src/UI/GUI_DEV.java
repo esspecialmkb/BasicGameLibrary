@@ -12,6 +12,13 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.font.BitmapFont;
 import com.jme3.font.BitmapText;
 import com.jme3.font.Rectangle;
+import com.jme3.input.KeyInput;
+import com.jme3.input.MouseInput;
+import com.jme3.input.controls.ActionListener;
+import com.jme3.input.controls.AnalogListener;
+import com.jme3.input.controls.KeyTrigger;
+import com.jme3.input.controls.MouseAxisTrigger;
+import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector2f;
@@ -41,6 +48,7 @@ public class GUI_DEV extends SimpleApplication {
         app.start(); // start the game
     }
 
+    // Initialize the application here
     @Override
     public void simpleInitApp() {
         createRoot();
@@ -65,6 +73,41 @@ public class GUI_DEV extends SimpleApplication {
         txt.setText("Demo Text");
         txt.setLocalTranslation(0, txt.getHeight(), 0);
         guiNode.attachChild(txt);
+        
+        // Event Handler Setup
+        setupInputMappings();
+    }
+    
+    protected void setupInputMappings(){
+        // Test multiple inputs per mapping
+        inputManager.addMapping("My Action",
+                new KeyTrigger(KeyInput.KEY_SPACE),
+                new MouseAxisTrigger(MouseInput.AXIS_WHEEL, false));
+        
+        inputManager.addMapping("Mouse L", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
+        inputManager.addMapping("Mouse M", new MouseButtonTrigger(MouseInput.BUTTON_MIDDLE));
+        inputManager.addMapping("Mouse R", new MouseButtonTrigger(MouseInput.BUTTON_RIGHT));
+        
+        inputManager.addMapping("Mouse Right", new MouseAxisTrigger(MouseInput.AXIS_X, true));
+        inputManager.addMapping("Mouse Left", new MouseAxisTrigger(MouseInput.AXIS_X, false));
+        
+        inputManager.addMapping("Mouse Up", new MouseAxisTrigger(MouseInput.AXIS_Y, true));
+        inputManager.addMapping("Mouse Down", new MouseAxisTrigger(MouseInput.AXIS_Y, false));
+        
+        inputManager.addMapping("Mouse Wheel Up", new MouseAxisTrigger(MouseInput.AXIS_WHEEL,false));
+        inputManager.addMapping("Mouse Wheel Down", new MouseAxisTrigger(MouseInput.AXIS_WHEEL,true));
+
+        // Test multiple listeners per mapping
+        //inputManager.addListener(actionListener, "My Action");
+        //inputManager.addListener(analogListener, "My Action");
+        
+        inputManager.addListener(actionListener, "Mouse L");
+        inputManager.addListener(actionListener, "Mouse M");
+        inputManager.addListener(actionListener, "Mouse R");
+        inputManager.addListener(analogListener, "Mouse Right");
+        inputManager.addListener(analogListener, "Mouse Left");
+        inputManager.addListener(analogListener, "Mouse Up");
+        inputManager.addListener(analogListener, "Mouse Down");
     }
     
     protected void createRoot(){
@@ -178,5 +221,18 @@ public class GUI_DEV extends SimpleApplication {
     public void simpleUpdate(float tpf) {
         cursorPosition = inputManager.getCursorPosition();
         uiRoot.collideWith((int)cursorPosition.x, (int)cursorPosition.y);
+        uiRoot.uiTick();
     }
+    
+    // Event Listeners
+    private ActionListener actionListener = new ActionListener(){
+        public void onAction(String name, boolean pressed, float tpf){
+            System.out.println(name + " = " + pressed);
+        }
+    };
+    public AnalogListener analogListener = new AnalogListener() {
+        public void onAnalog(String name, float value, float tpf) {
+            //System.out.println(name + " = " + (value/tpf));
+        }
+    };
 }
