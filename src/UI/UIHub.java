@@ -14,9 +14,11 @@ import java.util.ArrayList;
 public class UIHub extends UIElement{
     ArrayList<String> messages = new ArrayList<>();
     
+    ArrayList<UIElement> subscribers;
     /*
     Hub topic ids
-    1 - Mouse interaction
+    0 - UI interaction (Hover)
+    1 - Mouse interaction (Click, mouse move)
     */
     
     // This is a prototype Publish-Subscibe Server/Hub - tailored to the GUI
@@ -49,7 +51,7 @@ public class UIHub extends UIElement{
             // 0: topic, 1: id, 2:message
             
             // PROCESS MESSAGES WE CARE ABOUT
-            
+            System.out.println(split[2]);
             // Discard message when done
             messages.remove(0);
             mCount++;

@@ -22,6 +22,7 @@ public class UIButton extends UIElement{
     protected void buildMesh(MeshElement nMesh){
 
         if(nMesh != null){
+            // If a mesh has been provided, use it
             mesh = nMesh;
             super.buildMesh(mesh);
             return;

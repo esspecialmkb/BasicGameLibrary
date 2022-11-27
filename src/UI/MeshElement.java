@@ -7,10 +7,9 @@ package UI;
 
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
-import com.jme3.scene.Mesh;
 
 /**
- *
+ *  This class encapsulates raw (static) mesh data.
  * @author michael
  */
 public class MeshElement{

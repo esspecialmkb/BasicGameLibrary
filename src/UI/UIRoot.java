@@ -5,8 +5,9 @@
  */
 package UI;
 
+import com.jme3.input.controls.ActionListener;
+import com.jme3.input.controls.AnalogListener;
 import com.jme3.material.Material;
-import com.jme3.math.Vector2f;
 
 /**
  *
@@ -59,6 +60,8 @@ public class UIRoot extends UIElement{
                             if(result){
                                 //System.out.println(this.name + " Collide With " + hoverChild.name);
                                 ui.post(1, hoverChild.id, hoverChild.name + "::MOUSEOVER");
+                                lastMouseX = x;
+                                lastMouseY = y;
                                 return true;
                             }
                         }
@@ -74,6 +77,8 @@ public class UIRoot extends UIElement{
                         ui.post(1, lastHover.id, lastHover.name + "::HOVER");
                         isHoverNotify = true;
                     }
+                    lastMouseX = x;
+                    lastMouseY = y;
                     return true;
                 }else{
                     isHover = false;
@@ -100,9 +105,24 @@ public class UIRoot extends UIElement{
             // Return false if no element found
             lastHover = null;
             isHover = false;
+            lastMouseX = x;
+            lastMouseY = y;
             return false;
         }
         public void uiTick(){
             this.ui.onUpdate();
         }
+        
+        // Event Listeners
+        protected ActionListener actionListener = new ActionListener(){
+            public void onAction(String name, boolean pressed, float tpf){
+                //System.out.println(name + " = " + pressed);
+                ui.post(1,-1,name + " " +pressed);
+            }
+        };
+        protected AnalogListener analogListener = new AnalogListener() {
+            public void onAnalog(String name, float value, float tpf) {
+                //System.out.println(name + " = " + (value/tpf));
+            }
+        };
     }

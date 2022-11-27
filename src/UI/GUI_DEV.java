@@ -2,6 +2,9 @@
 
 package UI;
 
+import static UI.MeshElement.MeshBufferColor;
+import static UI.MeshElement.MeshBufferIndex;
+import static UI.MeshElement.MeshBufferVertex;
 import static UI.UIRoot.UI_BUTTON_HEIGHT;
 import static UI.UIRoot.UI_BUTTON_WIDTH;
 import static UI.UIRoot.UI_PANEL_HEIGHT;
@@ -22,6 +25,7 @@ import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector2f;
+import com.jme3.math.Vector3f;
 import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.shape.Box;
@@ -36,12 +40,83 @@ public class GUI_DEV extends SimpleApplication {
     
     private BitmapText txt;
     
+    public class UIText extends UIElement{
+        // This object just makes a visible text object
+        MeshElement mesh;
+        String message;
+        
+        @Override
+        protected void buildMesh(MeshElement nMesh){
+            if(nMesh != null){
+                // If a mesh has been provided, use it
+                mesh = nMesh;
+                super.buildMesh(mesh);
+                return;
+            }
+            
+            // DEMO TEXT
+            BitmapFont fnt = assetManager.loadFont("Interface/Fonts/Default.fnt");
+            txt = new BitmapText(fnt, false);
+            txt.setBox(new Rectangle(0, 0, settings.getWidth(), settings.getHeight()));
+            txt.setSize(fnt.getPreferredSize() * 2f);
+            txt.setText("Demo Text");
+            txt.setLocalTranslation(0, txt.getHeight(), 0);
+            guiNode.attachChild(txt);
+
+            // Build a rectangle with local coordinates
+
+            // Create the MeshElement with the proper buffer size
+            mesh = new MeshElement();
+            mesh.initBuffer(MeshBufferVertex, 4);
+            mesh.initBuffer(MeshBufferIndex, 4);
+            mesh.initBuffer(MeshBufferColor, 4);
+
+            // Create Vertices - Top/Left Origin
+            mesh.vertices[0] = new Vector3f(0           ,0              ,this.z);
+            mesh.vertices[1] = new Vector3f(this.width  ,0              ,this.z);
+            mesh.vertices[2] = new Vector3f(this.width  ,this.height    ,this.z);
+            mesh.vertices[3] = new Vector3f(0           ,this.height    ,this.z);
+
+            // Create Triangle Indices - Counterclockwise rotation
+            mesh.index[0] = 0;
+            mesh.index[1] = 1;
+            mesh.index[2] = 2;
+            mesh.index[3] = 2;
+            mesh.index[4] = 3;
+            mesh.index[5] = 0;
+
+            // Create Colors
+            mesh.color[0] = 0;
+            mesh.color[1] = 1;
+            mesh.color[2] = 0;
+            mesh.color[3] = 1;
+
+            mesh.color[4] = 0;
+            mesh.color[5] = 1;
+            mesh.color[6] = 0;
+            mesh.color[7] = 1;
+
+            mesh.color[8] = 0;
+            mesh.color[9] = 1;
+            mesh.color[10] = 0;
+            mesh.color[11] = 1;
+
+            mesh.color[12] = 0;
+            mesh.color[13] = 1;
+            mesh.color[14] = 0;
+            mesh.color[15] = 1;
+
+            // Let the base class take care of assembling the mesh buffers
+            super.buildMesh(mesh);
+        }
+    }
     
     UIHub uiHub;
     UIRoot uiRoot;
     UIButton uiButton0;
     UIPanel uiPanel0;
     UIScrollBar uiScroll0;
+    UIText uitext0;
 
     public static void main(String[] args){
         GUI_DEV app = new GUI_DEV();
@@ -101,6 +176,8 @@ public class GUI_DEV extends SimpleApplication {
         //inputManager.addListener(actionListener, "My Action");
         //inputManager.addListener(analogListener, "My Action");
         
+        // Using the eventListeners from the main class
+        /*
         inputManager.addListener(actionListener, "Mouse L");
         inputManager.addListener(actionListener, "Mouse M");
         inputManager.addListener(actionListener, "Mouse R");
@@ -108,6 +185,16 @@ public class GUI_DEV extends SimpleApplication {
         inputManager.addListener(analogListener, "Mouse Left");
         inputManager.addListener(analogListener, "Mouse Up");
         inputManager.addListener(analogListener, "Mouse Down");
+        */
+        
+        // Using the eventListeners from the uiRoot object
+        inputManager.addListener(uiRoot.actionListener, "Mouse L");
+        inputManager.addListener(uiRoot.actionListener, "Mouse M");
+        inputManager.addListener(uiRoot.actionListener, "Mouse R");
+        inputManager.addListener(uiRoot.analogListener, "Mouse Right");
+        inputManager.addListener(uiRoot.analogListener, "Mouse Left");
+        inputManager.addListener(uiRoot.analogListener, "Mouse Up");
+        inputManager.addListener(uiRoot.analogListener, "Mouse Down");
     }
     
     protected void createRoot(){
@@ -198,6 +285,20 @@ public class GUI_DEV extends SimpleApplication {
         scroll.buildMesh(null);
         
         return scroll;
+    }
+    
+    protected UIText createUIText(String name, String message){
+        // Create a text blurb
+        UIText text = new UIText();
+        
+        text.x = 20;
+        text.y = 20;
+        text.z = -5;
+        
+        text.width = 200;
+        text.height = 20;
+        
+        return text;
     }
     
     public void createScene(){
