@@ -57,6 +57,241 @@ public class TestCustomAnimMesh extends SimpleApplication {
         Vector3f neck;
         Vector3f face;
         
+        protected void initProtoHumanoidData(){
+            protoMesh = new MeshElement();
+            protoMesh.initBuffer(MeshElement.MeshBufferVertex,16);
+            protoMesh.initBuffer(MeshElement.MeshBufferIndex,72);
+            protoMesh.initBuffer(MeshElement.MeshBufferColor,16);
+            
+            initLLegVerts();
+            
+            initLLegIndex();
+            
+            initLLegColors();
+        }
+        
+        protected void initLLegVerts(){
+            // Create Vertices - L Shin first
+            protoMesh.vertices[0] = new Vector3f(0      ,0 ,leg.z/2);
+            protoMesh.vertices[1] = new Vector3f(leg.x ,0 ,leg.z/2);
+            protoMesh.vertices[2] = new Vector3f(leg.x  ,0 ,-leg.z/2);
+            protoMesh.vertices[3] = new Vector3f(0      ,0 ,-leg.z/2);
+            
+            protoMesh.vertices[4] = new Vector3f(0      ,leg.y/2 ,leg.z/2);
+            protoMesh.vertices[5] = new Vector3f(leg.x ,leg.y/2 ,leg.z/2);
+            protoMesh.vertices[6] = new Vector3f(leg.x  ,leg.y/2 ,-leg.z/2);
+            protoMesh.vertices[7] = new Vector3f(0      ,leg.y/2 ,-leg.z/2);
+            
+            protoMesh.vertices[8] = new Vector3f(0      ,leg.y/2 ,leg.z/2);
+            protoMesh.vertices[9] = new Vector3f(leg.x ,leg.y/2 ,leg.z/2);
+            protoMesh.vertices[10] = new Vector3f(leg.x  ,leg.y/2 ,-leg.z/2);
+            protoMesh.vertices[11] = new Vector3f(0      ,leg.y/2 ,-leg.z/2);
+            
+            protoMesh.vertices[12]  = new Vector3f(0      ,leg.y ,leg.z/2);
+            protoMesh.vertices[13]  = new Vector3f(leg.x ,leg.y ,leg.z/2);
+            protoMesh.vertices[14] = new Vector3f(leg.x  ,leg.y ,-leg.z/2);
+            protoMesh.vertices[15] = new Vector3f(0      ,leg.y ,-leg.z/2);
+        }
+        
+        protected void initLLegIndex(){
+            // Create Triangle Indices - Clockwise rotation
+            // Bottom (foot) faces
+            protoMesh.index[0] = 0;
+            protoMesh.index[1] = 3;
+            protoMesh.index[2] = 2;
+            
+            protoMesh.index[3] = 2;
+            protoMesh.index[4] = 1;
+            protoMesh.index[5] = 0;
+            
+            // Front shin faces
+            protoMesh.index[6] = 0;
+            protoMesh.index[7] = 1;
+            protoMesh.index[8] = 5;
+            
+            protoMesh.index[9] = 5;
+            protoMesh.index[10] = 4;
+            protoMesh.index[11] = 0;
+            
+            // Left shin faces
+            protoMesh.index[12] = 3;
+            protoMesh.index[13] = 0;
+            protoMesh.index[14] = 4;
+            
+            protoMesh.index[15] = 4;
+            protoMesh.index[16] = 7;
+            protoMesh.index[17] = 3;
+            
+            // Back shin faces
+            protoMesh.index[18] = 2;
+            protoMesh.index[19] = 3;
+            protoMesh.index[20] = 7;
+            
+            protoMesh.index[21] = 7;
+            protoMesh.index[22] = 6;
+            protoMesh.index[23] = 2;
+            
+            // Right shin faces
+            protoMesh.index[24] = 1;
+            protoMesh.index[25] = 2;
+            protoMesh.index[26] = 6;
+            
+            protoMesh.index[27] = 6;
+            protoMesh.index[28] = 5;
+            protoMesh.index[29] = 1;
+            
+            // Top shin faces
+            protoMesh.index[30] = 7;
+            protoMesh.index[31] = 4;
+            protoMesh.index[32] = 5;
+            
+            protoMesh.index[33] = 5;
+            protoMesh.index[34] = 6;
+            protoMesh.index[35] = 7;
+            
+            // Bottom Thigh faces
+            protoMesh.index[36] = 8;
+            protoMesh.index[37] = 11;
+            protoMesh.index[38] = 10;
+            
+            protoMesh.index[39] = 10;
+            protoMesh.index[40] = 9;
+            protoMesh.index[41] = 8;
+            
+            // Front thigh faces
+            protoMesh.index[42] = 13;
+            protoMesh.index[43] = 12;
+            protoMesh.index[44] = 8;
+            
+            protoMesh.index[45] = 8;
+            protoMesh.index[46] = 9;
+            protoMesh.index[47] = 13;
+            
+            // Left thigh faces
+            protoMesh.index[48] = 12;
+            protoMesh.index[49] = 15;
+            protoMesh.index[50] = 11;
+            
+            protoMesh.index[51] = 11;
+            protoMesh.index[52] = 8;
+            protoMesh.index[53] = 12;
+            
+            // Back thigh faces
+            protoMesh.index[54] = 15;
+            protoMesh.index[55] = 14;
+            protoMesh.index[56] = 10;
+            
+            protoMesh.index[57] = 10;
+            protoMesh.index[58] = 11;
+            protoMesh.index[59] = 15;
+            
+            // Right thigh faces
+            protoMesh.index[60] = 14;
+            protoMesh.index[61] = 13;
+            protoMesh.index[62] = 9;
+            
+            protoMesh.index[63] = 9;
+            protoMesh.index[64] = 10;
+            protoMesh.index[65] = 14;
+            
+            // Top thigh faces
+            protoMesh.index[66] = 14;
+            protoMesh.index[67] = 15;
+            protoMesh.index[68] = 12;
+            
+            protoMesh.index[69] = 12;
+            protoMesh.index[70] = 13;
+            protoMesh.index[71] = 14;
+            
+        }
+        
+        protected void initLLegColors(){
+            // Create Colors (rgba)
+            // First vert ring (foot)
+            protoMesh.color[0] = 0;
+            protoMesh.color[1] = 0;
+            protoMesh.color[2] = 1;
+            protoMesh.color[3] = 1;
+            
+            protoMesh.color[4] = 0;
+            protoMesh.color[5] = 0;
+            protoMesh.color[6] = 1;
+            protoMesh.color[7] = 1;
+            
+            protoMesh.color[8] = 0;
+            protoMesh.color[9] = 0;
+            protoMesh.color[10] = 1;
+            protoMesh.color[11] = 1;
+            
+            protoMesh.color[12] = 0;
+            protoMesh.color[13] = 0;
+            protoMesh.color[14] = 1;
+            protoMesh.color[15] = 1;
+            
+            // Second vert ring
+            protoMesh.color[16] = 0;
+            protoMesh.color[17] = 1;
+            protoMesh.color[18] = 0;
+            protoMesh.color[19] = 1;
+            
+            protoMesh.color[20] = 0;
+            protoMesh.color[21] = 1;
+            protoMesh.color[22] = 0;
+            protoMesh.color[23] = 1;
+            
+            protoMesh.color[24] = 0;
+            protoMesh.color[25] = 1;
+            protoMesh.color[26] = 0;
+            protoMesh.color[27] = 1;
+            
+            protoMesh.color[28] = 0;
+            protoMesh.color[29] = 1;
+            protoMesh.color[30] = 0;
+            protoMesh.color[31] = 1;
+            
+            // Third vert ring (copy of second but connects to fourth ring)
+            protoMesh.color[32] = 0;
+            protoMesh.color[33] = 1;
+            protoMesh.color[34] = 0;
+            protoMesh.color[35] = 1;
+            
+            protoMesh.color[36] = 0;
+            protoMesh.color[37] = 1;
+            protoMesh.color[38] = 0;
+            protoMesh.color[39] = 1;
+            
+            protoMesh.color[40] = 0;
+            protoMesh.color[41] = 1;
+            protoMesh.color[42] = 0;
+            protoMesh.color[43] = 1;
+            
+            protoMesh.color[44] = 0;
+            protoMesh.color[45] = 1;
+            protoMesh.color[46] = 0;
+            protoMesh.color[47] = 1;
+            
+            // Fourth vert ring
+            protoMesh.color[48] = 1;
+            protoMesh.color[49] = 0;
+            protoMesh.color[50] = 0;
+            protoMesh.color[51] = 1;
+            
+            protoMesh.color[52] = 1;
+            protoMesh.color[53] = 0;
+            protoMesh.color[54] = 0;
+            protoMesh.color[55] = 1;
+            
+            protoMesh.color[56] = 1;
+            protoMesh.color[57] = 0;
+            protoMesh.color[58] = 0;
+            protoMesh.color[59] = 1;
+            
+            protoMesh.color[60] = 1;
+            protoMesh.color[61] = 0;
+            protoMesh.color[62] = 0;
+            protoMesh.color[63] = 1;
+        }
+        
         protected void initMeshData(){
             // MeshElement uses static arrays, meaning we need to know
             //exactly how mant verts, uvs, etc... we will need
@@ -285,24 +520,54 @@ public class TestCustomAnimMesh extends SimpleApplication {
             indicesBuf.setupData(VertexBuffer.Usage.CpuOnly, 4, VertexBuffer.Format.UnsignedByte, indices);
             mesh.setBuffer(indicesBuf);
 
-            // Create bind pose buffers
-            mesh.generateBindPose(true);
-
             // Create skeleton with a few bones...
             rootBone = new Bone("root");
+            rootBone.setBindTransforms(Vector3f.ZERO, Quaternion.IDENTITY, Vector3f.UNIT_XYZ);
+            rootBone.setUserControl(true);
             
             hipBone = new Bone("root");
             hipBone.setBindTransforms(Vector3f.ZERO, Quaternion.IDENTITY, Vector3f.UNIT_XYZ);
             hipBone.setUserControl(true);
             
             kneeBone = new Bone("knee");
+            kneeBone.setBindTransforms(Vector3f.ZERO, Quaternion.IDENTITY, Vector3f.UNIT_XYZ);
+            kneeBone.setUserControl(true);
+            
             ankleBone = new Bone("ankle");
+            ankleBone.setBindTransforms(Vector3f.ZERO, Quaternion.IDENTITY, Vector3f.UNIT_XYZ);
+            ankleBone.setUserControl(true);
             
+            // Set the hierarchy before transforms
+            rootBone.addChild(hipBone);
+            hipBone.addChild(kneeBone);
+            kneeBone.addChild(ankleBone);
             
-            skeleton = new Skeleton(new Bone[]{ hipBone });
+            // Set user transforms seperate to keep them consistent
+            rootBone.setUserTransformsInModelSpace(Vector3f.ZERO, Quaternion.IDENTITY);
+            hipBone.setUserTransformsInModelSpace(Vector3f.ZERO, Quaternion.IDENTITY);
+            kneeBone.setUserTransformsInModelSpace(Vector3f.ZERO, Quaternion.IDENTITY);
+            ankleBone.setUserTransformsInModelSpace(Vector3f.ZERO, Quaternion.IDENTITY);
+            
+            // Create bind pose buffers
+            mesh.generateBindPose(true);
+            
+            skeleton = new Skeleton(new Bone[]{ rootBone,hipBone,kneeBone,ankleBone });
 
             // Assign all verticies to bone 0 with weight 1
-            for (int i = 0; i < mesh.getVertexCount() * 4; i += 4){
+            // Assign hip verticies to bone index 1, four weights per vertex
+            
+            //v=0
+            indices.array()[0]= 1;
+            indices.array()[1]= 1;
+            indices.array()[2]= 1;
+            indices.array()[3]= 1;
+            
+            // (Buffer, vertID, value)
+            assignVertexIndex(indices,0,(byte)1);
+            assignVertexWeight(weights,0,1);
+            
+            //v=1
+            /*for (int i = 0; i < mesh.getVertexCount() * 4; i += 4){
                 // assign vertex to bone index 0
                 indices.array()[i+0] = 0;
                 indices.array()[i+1] = 0;
@@ -314,10 +579,28 @@ public class TestCustomAnimMesh extends SimpleApplication {
                 weights.array()[i+1] = 0;
                 weights.array()[i+2] = 0;
                 weights.array()[i+3] = 0;
-            }
+            }*/
 
             // Maximum number of weights per bone is 1
             mesh.setMaxNumWeights(1);
+        }
+        
+        protected void assignVertexIndex(ByteBuffer index,int vertex, byte boneIndex){
+            int vertId = vertex * 4;
+            index.array()[vertId + 0] = boneIndex;
+            index.array()[vertId + 1] = boneIndex;
+            index.array()[vertId + 2] = boneIndex;
+            index.array()[vertId + 3] = boneIndex;
+            
+        }
+        
+        protected void assignVertexWeight(FloatBuffer wIndex,int vertex, float weight){
+            int vertId = vertex * 4;
+            wIndex.array()[vertId+0] = weight;
+            wIndex.array()[vertId+1] = 0;
+            wIndex.array()[vertId+2] = 0;
+            wIndex.array()[vertId+3] = 0;
+            
         }
         
         public void initPrototype(){
@@ -333,8 +616,8 @@ public class TestCustomAnimMesh extends SimpleApplication {
             face   = new Vector3f(1,3,1);
             
             // Get the mesh data ready
-            initMeshData();
-            
+            //initMeshData();
+            initProtoHumanoidData();
             mesh = new Mesh();
             mesh.setBuffer(Type.Position, 3, BufferUtils.createFloatBuffer(protoMesh.vertices));
             mesh.setBuffer(Type.Index, 1, BufferUtils.createIntBuffer(protoMesh.index));
