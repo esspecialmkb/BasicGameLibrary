@@ -24,13 +24,13 @@ import java.nio.FloatBuffer;
 public class Humaniod{
     // Mesh element to hold static mesh data
     MeshElement protoMesh;
-    Mesh mesh;
+    
     // Animated mesh data
     Bone[] bone;
     // List of bones
     Bone rootBone;
     Bone lHipBone;
-    Bone lKneeBone;
+    public Bone lKneeBone;
     Bone lAnkleBone;
     Bone rHipBone;
     Bone rKneeBone;
@@ -55,7 +55,7 @@ public class Humaniod{
 
     int[] boneIndex;
     float[] boneWeight;
-    Skeleton skeleton;
+    
 
     // Humanoid dimension data
     Vector3f leg;
@@ -63,34 +63,44 @@ public class Humaniod{
     Vector3f pelvis;
     Vector3f torso;
     Vector3f chest;
-    Vector3f uArm;
-    Vector3f fArm;
+    Vector3f arm;
     Vector3f neck;
     Vector3f face;
 
-    // Node for movement
-    Node model;
+    // Public elements
+    public Skeleton skeleton;
+    public Node model;
+    public Mesh mesh;
 
     protected void initProtoHumanoidData(){
         protoMesh = new MeshElement();
-        protoMesh.initBuffer(MeshElement.MeshBufferVertex,56);
+        protoMesh.initBuffer(MeshElement.MeshBufferVertex,96);
         protoMesh.initBuffer(MeshElement.MeshBufferIndex,252);
-        protoMesh.initBuffer(MeshElement.MeshBufferColor,56);
+        protoMesh.initBuffer(MeshElement.MeshBufferColor,96);
 
         initLLegVerts();
         initRLegVerts();
         initPelvisVerts();
         initBodyVerts();
+        initRArmVerts();
+        initLArmVerts();
+        initHeadVerts();
         
         initLLegIndex();
         initRLegIndex();
         initPelvisIndex();
         initBodyIndex();
+        initRArmIndex();
+        initLArmIndex();
+        initHeadIndex();
 
         initLLegColors();
         initRLegColors();
         initPelvisColors();
         initBodyColors();
+        initRArmColors();
+        initLArmColors();
+        initHeadColors();
     }
 
     protected void initLLegVerts(){
@@ -175,9 +185,62 @@ public class Humaniod{
         
     }
     
-    // initLArmVerts
-    // initRArmVerts
-    // initHeadVerts
+    protected void initRArmVerts(){
+        protoMesh.vertices[56] = new Vector3f(chest.x/2             ,(leg.y + pelvis.y + torso.y + chest.y) - arm.y,  arm.z/2);
+        protoMesh.vertices[57] = new Vector3f((chest.x/2) + arm.x   ,(leg.y + pelvis.y + torso.y + chest.y) - arm.y,  arm.z/2);
+        protoMesh.vertices[58] = new Vector3f((chest.x/2) + arm.x   ,(leg.y + pelvis.y + torso.y + chest.y) - arm.y,  -arm.z/2);
+        protoMesh.vertices[59] = new Vector3f(chest.x/2             ,(leg.y + pelvis.y + torso.y + chest.y) - arm.y,  -arm.z/2);
+        
+        protoMesh.vertices[60] = new Vector3f(chest.x/2             ,(leg.y + pelvis.y + torso.y + chest.y) - (arm.y/2),  arm.z/2);
+        protoMesh.vertices[61] = new Vector3f((chest.x/2) + arm.x   ,(leg.y + pelvis.y + torso.y + chest.y) - (arm.y/2),  arm.z/2);
+        protoMesh.vertices[62] = new Vector3f((chest.x/2) + arm.x   ,(leg.y + pelvis.y + torso.y + chest.y) - (arm.y/2),  -arm.z/2);
+        protoMesh.vertices[63] = new Vector3f(chest.x/2             ,(leg.y + pelvis.y + torso.y + chest.y) - (arm.y/2),  -arm.z/2);
+        
+        protoMesh.vertices[64] = new Vector3f(chest.x/2             ,(leg.y + pelvis.y + torso.y + chest.y) - (arm.y/2),  arm.z/2);
+        protoMesh.vertices[65] = new Vector3f((chest.x/2) + arm.x   ,(leg.y + pelvis.y + torso.y + chest.y) - (arm.y/2),  arm.z/2);
+        protoMesh.vertices[66] = new Vector3f((chest.x/2) + arm.x   ,(leg.y + pelvis.y + torso.y + chest.y) - (arm.y/2),  -arm.z/2);
+        protoMesh.vertices[67] = new Vector3f(chest.x/2             ,(leg.y + pelvis.y + torso.y + chest.y) - (arm.y/2),  -arm.z/2);
+        
+        protoMesh.vertices[68] = new Vector3f(chest.x/2             ,(leg.y + pelvis.y + torso.y + chest.y),  arm.z/2);
+        protoMesh.vertices[69] = new Vector3f((chest.x/2) + arm.x   ,(leg.y + pelvis.y + torso.y + chest.y),  arm.z/2);
+        protoMesh.vertices[70] = new Vector3f((chest.x/2) + arm.x   ,(leg.y + pelvis.y + torso.y + chest.y),  -arm.z/2);
+        protoMesh.vertices[71] = new Vector3f(chest.x/2             ,(leg.y + pelvis.y + torso.y + chest.y),  -arm.z/2);
+    }
+    
+    protected void initLArmVerts(){
+        protoMesh.vertices[72] = new Vector3f((-chest.x/2) - (arm.x) ,(leg.y + pelvis.y + torso.y + chest.y) - arm.y,  arm.z/2);
+        protoMesh.vertices[73] = new Vector3f(-chest.x/2            ,(leg.y + pelvis.y + torso.y + chest.y) - arm.y,  arm.z/2);
+        protoMesh.vertices[74] = new Vector3f(-chest.x/2            ,(leg.y + pelvis.y + torso.y + chest.y) - arm.y,  -arm.z/2);
+        protoMesh.vertices[75] = new Vector3f((-chest.x/2) - (arm.x) ,(leg.y + pelvis.y + torso.y + chest.y) - arm.y,  -arm.z/2);
+        
+        protoMesh.vertices[76] = new Vector3f((-chest.x/2) - (arm.x) ,(leg.y + pelvis.y + torso.y + chest.y) - (arm.y/2),  arm.z/2);
+        protoMesh.vertices[77] = new Vector3f(-chest.x/2            ,(leg.y + pelvis.y + torso.y + chest.y) - (arm.y/2),  arm.z/2);
+        protoMesh.vertices[78] = new Vector3f(-chest.x/2            ,(leg.y + pelvis.y + torso.y + chest.y) - (arm.y/2),  -arm.z/2);
+        protoMesh.vertices[79] = new Vector3f((-chest.x/2) - (arm.x) ,(leg.y + pelvis.y + torso.y + chest.y) - (arm.y/2),  -arm.z/2);
+        
+        protoMesh.vertices[80] = new Vector3f((-chest.x/2) - (arm.x) ,(leg.y + pelvis.y + torso.y + chest.y) - (arm.y/2),  arm.z/2);
+        protoMesh.vertices[81] = new Vector3f(-chest.x/2             ,(leg.y + pelvis.y + torso.y + chest.y) - (arm.y/2),  arm.z/2);
+        protoMesh.vertices[82] = new Vector3f(-chest.x/2             ,(leg.y + pelvis.y + torso.y + chest.y) - (arm.y/2),  -arm.z/2);
+        protoMesh.vertices[83] = new Vector3f((-chest.x/2) - (arm.x) ,(leg.y + pelvis.y + torso.y + chest.y) - (arm.y/2),  -arm.z/2);
+        
+        protoMesh.vertices[84] = new Vector3f((-chest.x/2) - (arm.x) ,(leg.y + pelvis.y + torso.y + chest.y),  arm.z/2);
+        protoMesh.vertices[85] = new Vector3f(-chest.x/2             ,(leg.y + pelvis.y + torso.y + chest.y),  arm.z/2);
+        protoMesh.vertices[86] = new Vector3f(-chest.x/2             ,(leg.y + pelvis.y + torso.y + chest.y),  -arm.z/2);
+        protoMesh.vertices[87] = new Vector3f((-chest.x/2) - (arm.x) ,(leg.y + pelvis.y + torso.y + chest.y),  -arm.z/2);
+    }
+    
+    protected void initHeadVerts(){
+        protoMesh.vertices[88] = new Vector3f(-face.x/2         ,(leg.y + pelvis.y + torso.y + chest.y),  face.z/2);
+        protoMesh.vertices[89] = new Vector3f(face.x/2         ,(leg.y + pelvis.y + torso.y + chest.y),  face.z/2);
+        protoMesh.vertices[90] = new Vector3f(face.x/2         ,(leg.y + pelvis.y + torso.y + chest.y),  -face.z/2);
+        protoMesh.vertices[91] = new Vector3f(-face.x/2         ,(leg.y + pelvis.y + torso.y + chest.y),  -face.z/2);
+        
+        protoMesh.vertices[92] = new Vector3f(-face.x/2         ,(leg.y + pelvis.y + torso.y + chest.y) + face.y,  face.z/2);
+        protoMesh.vertices[93] = new Vector3f(face.x/2         ,(leg.y + pelvis.y + torso.y + chest.y) + face.y,  face.z/2);
+        protoMesh.vertices[94] = new Vector3f(face.x/2         ,(leg.y + pelvis.y + torso.y + chest.y) + face.y,  -face.z/2);
+        protoMesh.vertices[95] = new Vector3f(-face.x/2         ,(leg.y + pelvis.y + torso.y + chest.y) + face.y,  -face.z/2);
+    }
+    
     
     protected void initLLegIndex(){
         // Create Triangle Indices - Clockwise rotation
@@ -572,9 +635,285 @@ public class Humaniod{
         protoMesh.index[251] = 54;
     }
     
-    // initLArmIndex
-    // initRArmIndex
-    // initHeadIndex
+    protected void initRArmIndex(){
+        // Forearm SECTION
+        // Bottom Forearm faces
+        protoMesh.index[252] = 57;
+        protoMesh.index[253] = 56;
+        protoMesh.index[254] = 59;
+        
+        protoMesh.index[255] = 59;
+        protoMesh.index[256] = 58;
+        protoMesh.index[257] = 57;
+        
+        // Front Forearm faces
+        protoMesh.index[258] = 61;
+        protoMesh.index[259] = 60;
+        protoMesh.index[260] = 56;
+        
+        protoMesh.index[261] = 56;
+        protoMesh.index[262] = 57;
+        protoMesh.index[263] = 61;
+        
+        // Left Forearm faces
+        protoMesh.index[264] = 60;
+        protoMesh.index[265] = 63;
+        protoMesh.index[266] = 59;
+        
+        protoMesh.index[267] = 59;
+        protoMesh.index[268] = 56;
+        protoMesh.index[269] = 60;
+        
+        // Back Forearm faces
+        protoMesh.index[270] = 63;
+        protoMesh.index[271] = 62;
+        protoMesh.index[272] = 58;
+        
+        protoMesh.index[273] = 58;
+        protoMesh.index[274] = 59;
+        protoMesh.index[275] = 63;
+        
+        // Right Forearm faces
+        protoMesh.index[276] = 62;
+        protoMesh.index[277] = 61;
+        protoMesh.index[278] = 57;
+        
+        protoMesh.index[279] = 57;
+        protoMesh.index[280] = 58;
+        protoMesh.index[281] = 62;
+        
+        // Top Forearm faces
+        protoMesh.index[282] = 62;
+        protoMesh.index[283] = 63;
+        protoMesh.index[284] = 60;
+        
+        protoMesh.index[285] = 60;
+        protoMesh.index[286] = 61;
+        protoMesh.index[287] = 62;
+        
+        // Upper arm SECTION
+        // Bottom Upper arm faces
+        protoMesh.index[288] = 65;
+        protoMesh.index[289] = 64;
+        protoMesh.index[290] = 67;
+        
+        protoMesh.index[291] = 67;
+        protoMesh.index[292] = 66;
+        protoMesh.index[293] = 65;
+        
+        // Front Upper arm faces
+        protoMesh.index[294] = 69;
+        protoMesh.index[295] = 68;
+        protoMesh.index[296] = 64;
+        
+        protoMesh.index[297] = 64;
+        protoMesh.index[298] = 65;
+        protoMesh.index[299] = 69;
+        
+        // Left Upper arm faces
+        protoMesh.index[300] = 68;
+        protoMesh.index[301] = 71;
+        protoMesh.index[302] = 67;
+        
+        protoMesh.index[303] = 67;
+        protoMesh.index[304] = 64;
+        protoMesh.index[305] = 68;
+        
+        // Back Upper arm faces
+        protoMesh.index[306] = 71;
+        protoMesh.index[307] = 70;
+        protoMesh.index[308] = 66;
+        
+        protoMesh.index[309] = 66;
+        protoMesh.index[310] = 67;
+        protoMesh.index[311] = 71;
+        
+        // Right Upper arm faces
+        protoMesh.index[312] = 70;
+        protoMesh.index[313] = 69;
+        protoMesh.index[314] = 65;
+        
+        protoMesh.index[315] = 65;
+        protoMesh.index[316] = 66;
+        protoMesh.index[317] = 70;
+        
+        // Top Upper arm faces
+        protoMesh.index[318] = 70;
+        protoMesh.index[319] = 71;
+        protoMesh.index[320] = 68;
+        
+        protoMesh.index[321] = 68;
+        protoMesh.index[322] = 69;
+        protoMesh.index[323] = 70;
+    }
+    protected void initLArmIndex(){
+        // Forearm SECTION
+        // Bottom Forearm faces
+        protoMesh.index[324] = 73;
+        protoMesh.index[325] = 72;
+        protoMesh.index[326] = 75;
+        
+        protoMesh.index[327] = 75;
+        protoMesh.index[328] = 74;
+        protoMesh.index[329] = 73;
+        
+        // Front Forearm faces
+        protoMesh.index[330] = 77;
+        protoMesh.index[331] = 76;
+        protoMesh.index[332] = 72;
+        
+        protoMesh.index[333] = 72;
+        protoMesh.index[334] = 73;
+        protoMesh.index[335] = 77;
+        
+        // Left Forearm faces
+        protoMesh.index[336] = 76;
+        protoMesh.index[337] = 79;
+        protoMesh.index[338] = 75;
+        
+        protoMesh.index[339] = 75;
+        protoMesh.index[340] = 72;
+        protoMesh.index[341] = 76;
+        
+        // Back Forearm faces
+        protoMesh.index[342] = 79;
+        protoMesh.index[343] = 78;
+        protoMesh.index[344] = 74;
+        
+        protoMesh.index[345] = 74;
+        protoMesh.index[346] = 75;
+        protoMesh.index[347] = 79;
+        
+        // Right Forearm faces
+        protoMesh.index[348] = 78;
+        protoMesh.index[349] = 77;
+        protoMesh.index[350] = 73;
+        
+        protoMesh.index[351] = 73;
+        protoMesh.index[352] = 74;
+        protoMesh.index[353] = 78;
+        
+        // Top Forearm faces
+        protoMesh.index[354] = 78;
+        protoMesh.index[355] = 79;
+        protoMesh.index[356] = 76;
+        
+        protoMesh.index[357] = 76;
+        protoMesh.index[358] = 77;
+        protoMesh.index[359] = 78;
+        
+        // Upper arm SECTION
+        // Bottom Upper arm faces
+        protoMesh.index[360] = 81;
+        protoMesh.index[361] = 80;
+        protoMesh.index[362] = 83;
+        
+        protoMesh.index[363] = 83;
+        protoMesh.index[364] = 82;
+        protoMesh.index[365] = 81;
+        
+        // Front Upper arm faces
+        protoMesh.index[366] = 85;
+        protoMesh.index[367] = 84;
+        protoMesh.index[368] = 80;
+        
+        protoMesh.index[369] = 80;
+        protoMesh.index[370] = 81;
+        protoMesh.index[371] = 85;
+        
+        // Left Upper arm faces
+        protoMesh.index[372] = 84;
+        protoMesh.index[373] = 87;
+        protoMesh.index[374] = 83;
+        
+        protoMesh.index[375] = 83;
+        protoMesh.index[376] = 80;
+        protoMesh.index[377] = 84;
+        
+        // Back Upper arm faces
+        protoMesh.index[378] = 87;
+        protoMesh.index[379] = 86;
+        protoMesh.index[380] = 82;
+        
+        protoMesh.index[381] = 82;
+        protoMesh.index[382] = 83;
+        protoMesh.index[383] = 87;
+        
+        // Right Upper arm faces
+        protoMesh.index[384] = 86;
+        protoMesh.index[385] = 85;
+        protoMesh.index[386] = 81;
+        
+        protoMesh.index[387] = 81;
+        protoMesh.index[388] = 82;
+        protoMesh.index[389] = 86;
+        
+        // Top Upper arm faces
+        protoMesh.index[390] = 86;
+        protoMesh.index[391] = 87;
+        protoMesh.index[392] = 84;
+        
+        protoMesh.index[393] = 84;
+        protoMesh.index[394] = 85;
+        protoMesh.index[395] = 86;
+    }
+    
+    protected void initHeadIndex(){
+        // Upper arm SECTION
+        // Bottom Upper arm faces
+        protoMesh.index[396] = 89;
+        protoMesh.index[397] = 88;
+        protoMesh.index[398] = 91;
+        
+        protoMesh.index[399] = 91;
+        protoMesh.index[400] = 90;
+        protoMesh.index[401] = 89;
+        
+        // Front Upper arm faces
+        protoMesh.index[402] = 93;
+        protoMesh.index[403] = 92;
+        protoMesh.index[404] = 88;
+        
+        protoMesh.index[405] = 88;
+        protoMesh.index[406] = 89;
+        protoMesh.index[407] = 93;
+        
+        // Left Upper arm faces
+        protoMesh.index[408] = 92;
+        protoMesh.index[409] = 95;
+        protoMesh.index[410] = 91;
+        
+        protoMesh.index[411] = 91;
+        protoMesh.index[412] = 88;
+        protoMesh.index[413] = 92;
+        
+        // Back Upper arm faces
+        protoMesh.index[414] = 95;
+        protoMesh.index[415] = 94;
+        protoMesh.index[416] = 90;
+        
+        protoMesh.index[417] = 90;
+        protoMesh.index[418] = 91;
+        protoMesh.index[419] = 95;
+        
+        // Right Upper arm faces
+        protoMesh.index[420] = 94;
+        protoMesh.index[421] = 93;
+        protoMesh.index[422] = 89;
+        
+        protoMesh.index[423] = 89;
+        protoMesh.index[424] = 90;
+        protoMesh.index[425] = 94;
+        
+        // Top Upper arm faces
+        protoMesh.index[426] = 94;
+        protoMesh.index[427] = 95;
+        protoMesh.index[428] = 92;
+        
+        protoMesh.index[429] = 92;
+        protoMesh.index[430] = 93;
+        protoMesh.index[431] = 94;
+    }
     
     protected void initLLegColors(){
         // Create Colors (rgba)
@@ -676,9 +1015,77 @@ public class Humaniod{
         assignVertexColor(54,1,0,0,1);
         assignVertexColor(55,1,0,0,1);
     }
-    // initLArmColors
-    // initRArmColors
-    // initHeadColors
+    
+    protected void initLArmColors(){
+        // Create Colors (rgba)
+        // First vert ring (hand)
+        // (Vertex, r,g,b,a)
+        assignVertexColor(72,1,0,1,1);
+        assignVertexColor(73,1,0,1,1);
+        assignVertexColor(74,1,0,1,1);
+        assignVertexColor(75,1,0,1,1);
+
+        // Second vert ring
+        assignVertexColor(76,1,0,1,1);
+        assignVertexColor(77,1,0,1,1);
+        assignVertexColor(78,1,0,1,1);
+        assignVertexColor(79,1,0,1,1);
+        
+        // Third vert ring (copy of second but connects to fourth ring)
+        assignVertexColor(80,1,1,0,1);
+        assignVertexColor(81,1,1,0,1);
+        assignVertexColor(82,1,1,0,1);
+        assignVertexColor(83,1,1,0,1);
+
+        // Fourth vert ring
+        assignVertexColor(84,1,1,0,1);
+        assignVertexColor(85,1,1,0,1);
+        assignVertexColor(86,1,1,0,1);
+        assignVertexColor(87,1,1,0,1);
+    }
+    
+    protected void initRArmColors(){
+        // Create Colors (rgba)
+        // First vert ring (hand)
+        // (Vertex, r,g,b,a)
+        assignVertexColor(56,0,1,1,1);
+        assignVertexColor(57,0,1,1,1);
+        assignVertexColor(58,0,1,1,1);
+        assignVertexColor(59,0,1,1,1);
+
+        // Second vert ring
+        assignVertexColor(60,0,1,1,1);
+        assignVertexColor(61,0,1,1,1);
+        assignVertexColor(62,0,1,1,1);
+        assignVertexColor(63,0,1,1,1);
+        
+        // Third vert ring (copy of second but connects to fourth ring)
+        assignVertexColor(64,1,0,1,1);
+        assignVertexColor(65,1,0,1,1);
+        assignVertexColor(66,1,0,1,1);
+        assignVertexColor(67,1,0,1,1);
+
+        // Fourth vert ring
+        assignVertexColor(68,1,0,1,1);
+        assignVertexColor(69,1,0,1,1);
+        assignVertexColor(70,1,0,1,1);
+        assignVertexColor(71,1,0,1,1);
+    }
+    protected void initHeadColors(){
+        // Create Colors (rgba)
+        // First vert ring (neck)
+        // (Vertex, r,g,b,a)
+        assignVertexColor(88,0,1,0,1);
+        assignVertexColor(89,0,1,0,1);
+        assignVertexColor(90,0,1,0,1);
+        assignVertexColor(91,0,1,0,1);
+
+        // Second vert ring
+        assignVertexColor(92,0,1,0,1);
+        assignVertexColor(93,0,1,0,1);
+        assignVertexColor(94,0,1,0,1);
+        assignVertexColor(95,0,1,0,1);
+    }
     
     protected void initMeshData(){
         // MeshElement uses static arrays, meaning we need to know
@@ -1075,10 +1482,9 @@ public class Humaniod{
         pelvis = new Vector3f(2,1,1);
         torso  = new Vector3f(2,1.5f,1);
         chest  = new Vector3f(2,1.5f,1);
-        uArm   = new Vector3f(1,3,1);
-        fArm   = new Vector3f(1,3,1);
+        arm   = new Vector3f(1,3,1);
         neck   = new Vector3f(1,1,1);
-        face   = new Vector3f(1,3,1);
+        face   = new Vector3f(1,1.5f,1);
 
         // Get the mesh data ready
         //initMeshData();
