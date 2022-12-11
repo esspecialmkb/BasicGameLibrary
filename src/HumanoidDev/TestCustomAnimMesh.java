@@ -1,14 +1,11 @@
 package HumanoidDev;
 
-import UI.MeshElement;
 import com.jme3.animation.Bone;
 import com.jme3.animation.Skeleton;
 import com.jme3.animation.SkeletonControl;
-import mygame.*;
 import com.jme3.app.SimpleApplication;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
-import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
@@ -17,10 +14,8 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.VertexBuffer;
-import com.jme3.scene.VertexBuffer.Format;
 import com.jme3.scene.VertexBuffer.Type;
-import com.jme3.scene.VertexBuffer.Usage;
-import com.jme3.scene.shape.Box;
+import com.jme3.scene.debug.SkeletonDebugger;
 import com.jme3.util.BufferUtils;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -43,7 +38,7 @@ public class TestCustomAnimMesh extends SimpleApplication {
         TestCustomAnimMesh app = new TestCustomAnimMesh();
         app.start();
     }
-
+    
     @Override
     public void simpleInitApp() {
         human = new Humaniod();
@@ -54,6 +49,7 @@ public class TestCustomAnimMesh extends SimpleApplication {
         human.model = new Node("Human");
         
         Material mat = assetManager.loadMaterial("Materials/VertexColorMat.j3m");
+        //mat.getAdditionalRenderState().setWireframe(true);
         geom.setMaterial(mat);
         human.model.attachChild(geom);
         // Create skeleton control
@@ -62,6 +58,13 @@ public class TestCustomAnimMesh extends SimpleApplication {
         rootNode.attachChild(human.model);
         
         flyCam.setMoveSpeed(25);
+        
+        SkeletonDebugger skeletonDebug = new SkeletonDebugger("skeleton", skeletonControl.getSkeleton());
+        Material mat2 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        mat.setColor("Color", ColorRGBA.White);
+        mat.getAdditionalRenderState().setDepthTest(false);
+        skeletonDebug.setMaterial(mat);
+        human.model.attachChild(skeletonDebug);
         
     }
     
@@ -151,6 +154,8 @@ public class TestCustomAnimMesh extends SimpleApplication {
         
         Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         mat.setColor("Color", ColorRGBA.Blue);
+        
+
         geom.setMaterial(mat);
 
         rootNode.attachChild(geom);
@@ -179,7 +184,7 @@ public class TestCustomAnimMesh extends SimpleApplication {
         //rotation.fromAngleAxis(hipRot * FastMath.RAD_TO_DEG, Vector3f.UNIT_X);
         
         //human.hipBone.setUserTransforms(Vector3f.ZERO, rotation,Vector3f.UNIT_XYZ);
-        human.lKneeBone.setUserTransforms(Vector3f.ZERO, rotation.inverse(),Vector3f.UNIT_XYZ);
+        human.headBone.setUserTransforms(Vector3f.ZERO, rotation.inverse(),Vector3f.UNIT_XYZ);
         // After changing skeleton transforms, must update world data
         human.skeleton.updateWorldVectors();
     }

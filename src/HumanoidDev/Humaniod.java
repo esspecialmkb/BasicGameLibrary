@@ -28,17 +28,35 @@ public class Humaniod{
     // Animated mesh data
     Bone[] bone;
     // List of bones
-    Bone rootBone;
-    Bone lHipBone;
-    public Bone lKneeBone;
-    Bone lAnkleBone;
-    Bone rHipBone;
-    Bone rKneeBone;
-    Bone rAnkleBone;
+    public Bone rootBone;
     
-    Bone waistBone;
-    Bone torsoBone;
-    Bone chestBone;
+    // Body
+    public Bone waistBone;
+    public Bone torsoBone;
+    public Bone chestBone;
+    
+    // Left Leg
+    public Bone lHipBone;
+    public Bone lKneeBone;
+    public Bone lAnkleBone;
+    
+    // Right Leg
+    public Bone rHipBone;
+    public Bone rKneeBone;
+    public Bone rAnkleBone;
+    
+    // Left Arm
+    public Bone lShoulderBone;
+    public Bone lElbowBone;
+    public Bone lWristBone;
+    
+    // Right Arm
+    public Bone rShoulderBone;
+    public Bone rElbowBone;
+    public Bone rWristBone;
+    
+    // Head
+    public Bone headBone;
     
     // Bone rotations
     Quaternion rootRotation;
@@ -53,6 +71,16 @@ public class Humaniod{
     Quaternion torsoRotation;
     Quaternion chestRotation;
 
+    Quaternion lShoulderRotation;
+    Quaternion lElbowRotation;
+    Quaternion lHandRotation;
+    
+    Quaternion rShoulderRotation;
+    Quaternion rElbowRotation;
+    Quaternion rHandRotation;
+    
+    Quaternion headRotation;
+    
     int[] boneIndex;
     float[] boneWeight;
     
@@ -1319,46 +1347,95 @@ public class Humaniod{
 
         // Create skeleton with a few bones...
         rootBone = new Bone("root");
-        rootRotation = new Quaternion().fromAngles(0,0,0);
+        //rootRotation = new Quaternion().fromAngles(0,0,0);
         rootBone.setBindTransforms(Vector3f.ZERO, Quaternion.IDENTITY, Vector3f.UNIT_XYZ);
         rootBone.setUserControl(true);
 
         lHipBone = new Bone("l hip");
-        lHipRotation = new Quaternion().fromAngleAxis(0, Vector3f.UNIT_X);
+        //lHipRotation = new Quaternion().fromAngleAxis(0, Vector3f.UNIT_X);
         lHipBone.setBindTransforms(new Vector3f(leg.x/2,-pelvis.y/2,0), Quaternion.IDENTITY, Vector3f.UNIT_XYZ);
         lHipBone.setUserControl(true);
 
         lKneeBone = new Bone("l knee");
-        lKneeRotation = new Quaternion().fromAngleAxis(0, Vector3f.UNIT_X);
+        //lKneeRotation = new Quaternion().fromAngleAxis(0, Vector3f.UNIT_X);
         lKneeBone.setBindTransforms(new Vector3f(0,leg.y/-2,0), Quaternion.IDENTITY, Vector3f.UNIT_XYZ);
         lKneeBone.setUserControl(true);
 
         lAnkleBone = new Bone("l ankle");
-        lAnkleRotation = new Quaternion().fromAngleAxis(0, Vector3f.UNIT_X);
+        //lAnkleRotation = new Quaternion().fromAngleAxis(0, Vector3f.UNIT_X);
         lAnkleBone.setBindTransforms(new Vector3f(0,leg.y/-2,0), Quaternion.IDENTITY, Vector3f.UNIT_XYZ);
         lAnkleBone.setUserControl(true);
         
         // RIGHT LEG
         
         rHipBone = new Bone("r hip");
-        rHipRotation = new Quaternion().fromAngleAxis(0, Vector3f.UNIT_X);
+        //rHipRotation = new Quaternion().fromAngleAxis(0, Vector3f.UNIT_X);
         rHipBone.setBindTransforms(new Vector3f(-leg.x/2,-pelvis.y/2,0), Quaternion.IDENTITY, Vector3f.UNIT_XYZ);
         rHipBone.setUserControl(true);
 
         rKneeBone = new Bone("r knee");
-        rKneeRotation = new Quaternion().fromAngleAxis(0, Vector3f.UNIT_X);
+        //rKneeRotation = new Quaternion().fromAngleAxis(0, Vector3f.UNIT_X);
         rKneeBone.setBindTransforms(new Vector3f(0,leg.y/-2,0), Quaternion.IDENTITY, Vector3f.UNIT_XYZ);
         rKneeBone.setUserControl(true);
 
         rAnkleBone = new Bone("r ankle");
-        rAnkleRotation = new Quaternion().fromAngleAxis(0, Vector3f.UNIT_X);
+        //rAnkleRotation = new Quaternion().fromAngleAxis(0, Vector3f.UNIT_X);
         rAnkleBone.setBindTransforms(new Vector3f(0,leg.y/-2,0), Quaternion.IDENTITY, Vector3f.UNIT_XYZ);
         rAnkleBone.setUserControl(true);
         
-        waistBone = new Bone("r waist");
-        waistRotation = new Quaternion().fromAngleAxis(0, Vector3f.UNIT_X);
+        // BODY
+        waistBone = new Bone("waist");
+        //waistRotation = new Quaternion().fromAngleAxis(0, Vector3f.UNIT_X);
         waistBone.setBindTransforms(new Vector3f(0,leg.y + pelvis.y/2,0), Quaternion.IDENTITY, Vector3f.UNIT_XYZ);
         waistBone.setUserControl(true);
+        
+        torsoBone = new Bone("torso");
+        //torsoRotation = new Quaternion().fromAngleAxis(0, Vector3f.UNIT_X);
+        torsoBone.setBindTransforms(new Vector3f(0,pelvis.y/2,0), Quaternion.IDENTITY, Vector3f.UNIT_XYZ);
+        torsoBone.setUserControl(true);
+        
+        chestBone = new Bone("chest");
+        //chestRotation = new Quaternion().fromAngleAxis(0, Vector3f.UNIT_X);
+        chestBone.setBindTransforms(new Vector3f(0,torso.y,0), Quaternion.IDENTITY, Vector3f.UNIT_XYZ);
+        chestBone.setUserControl(true);
+        
+        // Left Arm
+        lShoulderBone = new Bone("l shoulder");
+        //lShoulderRotation = new Quaternion().fromAngleAxis(0, Vector3f.UNIT_X);
+        lShoulderBone.setBindTransforms(new Vector3f(arm.y/2,chest.y,0), Quaternion.IDENTITY, Vector3f.UNIT_XYZ);
+        lShoulderBone.setUserControl(true);
+        
+        lElbowBone = new Bone("l elbow");
+        //lElbowRotation = new Quaternion().fromAngleAxis(0, Vector3f.UNIT_X);
+        lElbowBone.setBindTransforms(new Vector3f(0,-arm.y/2,0), Quaternion.IDENTITY, Vector3f.UNIT_XYZ);
+        lElbowBone.setUserControl(true);
+        
+        lWristBone = new Bone("l wrist");
+        //lHandRotation = new Quaternion().fromAngleAxis(0, Vector3f.UNIT_X);
+        lWristBone.setBindTransforms(new Vector3f(0,-arm.y/2,0), Quaternion.IDENTITY, Vector3f.UNIT_XYZ);
+        lWristBone.setUserControl(true);
+
+        // Right Arm
+        rShoulderBone = new Bone("r shoulder");
+        //rShoulderRotation = new Quaternion().fromAngleAxis(0, Vector3f.UNIT_X);
+        rShoulderBone.setBindTransforms(new Vector3f(-arm.y/2,chest.y,0), Quaternion.IDENTITY, Vector3f.UNIT_XYZ);
+        rShoulderBone.setUserControl(true);
+        
+        rElbowBone = new Bone("r elbow");
+        //rElbowRotation = new Quaternion().fromAngleAxis(0, Vector3f.UNIT_X);
+        rElbowBone.setBindTransforms(new Vector3f(0,-arm.y/2,0), Quaternion.IDENTITY, Vector3f.UNIT_XYZ);
+        rElbowBone.setUserControl(true);
+        
+        rWristBone = new Bone("r wrist");
+        //rHandRotation = new Quaternion().fromAngleAxis(0, Vector3f.UNIT_X);
+        rWristBone.setBindTransforms(new Vector3f(0,-arm.y/2,0), Quaternion.IDENTITY, Vector3f.UNIT_XYZ);
+        rWristBone.setUserControl(true);
+        
+        // Head        
+        headBone = new Bone("head");
+        //headRotation = new Quaternion().fromAngleAxis(0, Vector3f.UNIT_X);
+        headBone.setBindTransforms(new Vector3f(0,chest.y,0), Quaternion.IDENTITY, Vector3f.UNIT_XYZ);
+        headBone.setUserControl(true);
 
         // Set the hierarchy before transforms
         rootBone.addChild(waistBone);
@@ -1371,11 +1448,26 @@ public class Humaniod{
         
         rHipBone.addChild(rKneeBone);
         rKneeBone.addChild(rAnkleBone);
+        
+        chestBone.addChild(headBone);
+        
+        waistBone.addChild(torsoBone);
+        torsoBone.addChild(chestBone);
+        chestBone.addChild(lShoulderBone);
+        chestBone.addChild(rShoulderBone);
+        
+        lShoulderBone.addChild(lElbowBone);
+        lElbowBone.addChild(lWristBone);
+        
+        rShoulderBone.addChild(rElbowBone);
+        rElbowBone.addChild(rWristBone);
+        
+        
+        
+        skeleton = new Skeleton(new Bone[]{ rootBone,lHipBone,lKneeBone,lAnkleBone,rHipBone,rKneeBone,rAnkleBone,waistBone,torsoBone,chestBone,lShoulderBone,lElbowBone,lWristBone,rShoulderBone,rElbowBone,rWristBone,headBone });
 
-        skeleton = new Skeleton(new Bone[]{ rootBone,lHipBone,lKneeBone,lAnkleBone,rHipBone,rKneeBone,rAnkleBone,waistBone });
-
-        // Assign all verticies to bone 0 with weight 1
-
+        skeleton.setBindingPose();
+        
         byte rootId = 0;
         byte lHipId = 1;
         byte lKneeId = 2;
@@ -1384,6 +1476,15 @@ public class Humaniod{
         byte rKneeId = 5;
         byte rAnkleId = 6;
         byte waistId = 7;
+        byte torsoId = 8;
+        byte chestId = 9;
+        byte lShoulderId = 10;
+        byte lElbowId = 11;
+        byte lWristId = 12;
+        byte rShoulderId = 13;
+        byte rElbowId = 14;
+        byte rWristId = 15;
+        byte headId = 16;
 
         // Assign l shin verticies to bone index 2
         // 0 - 7
@@ -1429,6 +1530,67 @@ public class Humaniod{
         for(int wi = 32; wi < 40; wi++){
             assignVertexIndex(indices,wi,waistId);
             assignVertexWeight(weights,wi,1);
+        }
+        
+        /*
+        byte torsoId = 8;
+        byte chestId = 9;
+        byte lShoulderId = 10;
+        byte lElbowId = 11;
+        byte lWristId = 12;
+        byte rShoulderId = 13;
+        byte rElbowId = 14;
+        byte rWristId = 15;
+        byte headId = 16;
+        */
+        
+        // Assin torso verts to bone index 8
+        // 40 - 47
+        for(int ti = 40; ti < 48; ti++){
+            assignVertexIndex(indices,ti,torsoId);
+            assignVertexWeight(weights,ti,1);
+        }
+        
+        // Assin chest verts to bone index 9
+        // 48 - 55
+        for(int ci = 48; ci < 56; ci++){
+            assignVertexIndex(indices,ci,chestId);
+            assignVertexWeight(weights,ci,1);
+        }
+        
+        // Assin l shoulder verts to bone index 10
+        // 56 - 63
+        for(int lsi = 56; lsi < 64; lsi++){
+            assignVertexIndex(indices,lsi,lShoulderId);
+            assignVertexWeight(weights,lsi,1);
+        }
+        
+        // Assin l elbow verts to bone index 11
+        // 64 - 71
+        for(int lei = 64; lei < 72; lei++){
+            assignVertexIndex(indices,lei,lElbowId);
+            assignVertexWeight(weights,lei,1);
+        }
+        
+        // Assin r shoulder verts to bone index 13
+        // 72 - 79
+        for(int rsi = 72; rsi < 80; rsi++){
+            assignVertexIndex(indices,rsi,rShoulderId);
+            assignVertexWeight(weights,rsi,1);
+        }
+        
+        // Assin r elbow verts to bone index 14
+        // 80 - 87
+        for(int rei = 80; rei < 88; rei++){
+            assignVertexIndex(indices,rei,rElbowId);
+            assignVertexWeight(weights,rei,1);
+        }
+        
+        // Assin head verts to bone index 16
+        // 88 - 95
+        for(int hi = 88; hi < 96; hi++){
+            assignVertexIndex(indices,hi,headId);
+            assignVertexWeight(weights,hi,1);
         }
         
         // Maximum number of weights per bone is 1
