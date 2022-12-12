@@ -6,6 +6,7 @@ import com.jme3.animation.SkeletonControl;
 import com.jme3.app.SimpleApplication;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
@@ -17,6 +18,12 @@ import com.jme3.scene.VertexBuffer;
 import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.scene.debug.SkeletonDebugger;
 import com.jme3.util.BufferUtils;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
@@ -61,11 +68,15 @@ public class TestCustomAnimMesh extends SimpleApplication {
         
         SkeletonDebugger skeletonDebug = new SkeletonDebugger("skeleton", skeletonControl.getSkeleton());
         Material mat2 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        mat.setColor("Color", ColorRGBA.White);
-        mat.getAdditionalRenderState().setDepthTest(false);
-        skeletonDebug.setMaterial(mat);
+        mat2.setColor("Color", ColorRGBA.White);
+        mat2.getAdditionalRenderState().setDepthTest(false);
+        skeletonDebug.setMaterial(mat2);
+        skeletonDebug.getWires().setLineWidth(5);
         human.model.attachChild(skeletonDebug);
         
+        setFramePose();
+        
+        writeFrameData();
     }
     
     protected void buildTestScene(){
@@ -168,6 +179,141 @@ public class TestCustomAnimMesh extends SimpleApplication {
     float time = 0;
     float key0 = 0;
     float key1 = 1;
+    
+    protected void setFramePose(){
+        human.rootBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(0, Vector3f.UNIT_X)  ,Vector3f.UNIT_XYZ);
+        human.lHipBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(30 * FastMath.DEG_TO_RAD, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
+        human.lKneeBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(0, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
+        human.lAnkleBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(0, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
+        human.rHipBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(0, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
+        human.rKneeBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(0, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
+        human.rAnkleBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(0, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
+        human.waistBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(0, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
+        human.torsoBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(0, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
+        human.chestBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(0, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
+        human.lShoulderBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(0, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
+        human.lElbowBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(0, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
+        human.lWristBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(0, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
+        human.rShoulderBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(0, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
+        human.rElbowBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(0, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
+        human.rWristBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(0, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
+        human.headBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(0, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
+    }
+    
+    // UNTESTED
+    protected void readFrameData(){
+        try {
+            FileReader reader = new FileReader("MyFile.txt");
+            BufferedReader bufferedReader = new BufferedReader(reader);
+ 
+            String line;
+ 
+            // Read the file contents
+            while ((line = bufferedReader.readLine()) != null) {
+                System.out.println(line);
+            }
+            reader.close();
+ 
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    protected void writeFrameData(){
+        try {
+            FileOutputStream outputStream = new FileOutputStream("MyFile.txt");
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream, "UTF-16");
+            BufferedWriter bufferedWriter = new BufferedWriter(outputStreamWriter);
+             
+            // Write file contents
+            //bufferedWriter.write("Xin chào");
+            //bufferedWriter.newLine();
+            //bufferedWriter.write("Hẹn gặp lại!");
+            //bufferedWriter.newLine();
+            bufferedWriter.write("FrameData");
+            Quaternion rRot = human.rootBone.getLocalRotation();
+            
+            Quaternion lHRot = human.lHipBone.getLocalRotation();
+            Quaternion lKRot = human.lKneeBone.getLocalRotation();
+            Quaternion lARot = human.lAnkleBone.getLocalRotation();
+            
+            Quaternion rHRot = human.rHipBone.getLocalRotation();
+            Quaternion rKRot = human.rKneeBone.getLocalRotation();
+            Quaternion rARot = human.rAnkleBone.getLocalRotation();
+            
+            Quaternion wRot = human.waistBone.getLocalRotation();
+            Quaternion tRot = human.torsoBone.getLocalRotation();
+            Quaternion cRot = human.chestBone.getLocalRotation();
+            
+            Quaternion lSRot = human.lShoulderBone.getLocalRotation();
+            Quaternion lERot = human.lElbowBone.getLocalRotation();
+            Quaternion lWRot = human.lWristBone.getLocalRotation();
+            
+            Quaternion rSRot = human.rShoulderBone.getLocalRotation();
+            Quaternion rERot = human.rElbowBone.getLocalRotation();
+            Quaternion rWRot = human.rWristBone.getLocalRotation();
+            
+            Quaternion hRot = human.headBone.getLocalRotation();
+            
+            float[] angles = new float[3];
+            
+            rRot.toAngles(angles);
+            bufferedWriter.write(0 +"," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            bufferedWriter.newLine();
+            lHRot.toAngles(angles);
+            bufferedWriter.write(1 +"," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            bufferedWriter.newLine();
+            lKRot.toAngles(angles);
+            bufferedWriter.write(2 +"," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            bufferedWriter.newLine();
+            lARot.toAngles(angles);
+            bufferedWriter.write(3 +"," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            bufferedWriter.newLine();
+            rHRot.toAngles(angles);
+            bufferedWriter.write(4 +"," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            bufferedWriter.newLine();
+            rKRot.toAngles(angles);
+            bufferedWriter.write(5 +"," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            bufferedWriter.newLine();
+            rARot.toAngles(angles);
+            bufferedWriter.write(6 +"," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            bufferedWriter.newLine();
+            wRot.toAngles(angles);
+            bufferedWriter.write(7 +"," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            bufferedWriter.newLine();
+            tRot.toAngles(angles);
+            bufferedWriter.write(8 +"," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            bufferedWriter.newLine();
+            cRot.toAngles(angles);
+            bufferedWriter.write(9 +"," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            bufferedWriter.newLine();
+            lSRot.toAngles(angles);
+            bufferedWriter.write(10 +"," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            bufferedWriter.newLine();
+            lERot.toAngles(angles);
+            bufferedWriter.write(11 +"," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            bufferedWriter.newLine();
+            lWRot.toAngles(angles);
+            bufferedWriter.write(12 +"," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            bufferedWriter.newLine();
+            rSRot.toAngles(angles);
+            bufferedWriter.write(13 +"," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            bufferedWriter.newLine();
+            rERot.toAngles(angles);
+            bufferedWriter.write(14 +"," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            bufferedWriter.newLine();
+            rWRot.toAngles(angles);
+            bufferedWriter.write(15 +"," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            bufferedWriter.newLine();
+            hRot.toAngles(angles);
+            bufferedWriter.write(16 +"," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            bufferedWriter.newLine();
+            bufferedWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
     @Override
     public void simpleUpdate(float tpf) {
         //TODO: add update code for skeleton rotation test
@@ -184,7 +330,7 @@ public class TestCustomAnimMesh extends SimpleApplication {
         //rotation.fromAngleAxis(hipRot * FastMath.RAD_TO_DEG, Vector3f.UNIT_X);
         
         //human.hipBone.setUserTransforms(Vector3f.ZERO, rotation,Vector3f.UNIT_XYZ);
-        human.headBone.setUserTransforms(Vector3f.ZERO, rotation.inverse(),Vector3f.UNIT_XYZ);
+        //human.lShoulderBone.setUserTransforms(Vector3f.ZERO, rotation.inverse(),Vector3f.UNIT_XYZ);
         // After changing skeleton transforms, must update world data
         human.skeleton.updateWorldVectors();
     }
