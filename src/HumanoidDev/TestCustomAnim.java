@@ -37,31 +37,24 @@ package HumanoidDev;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.jme3.animation.Bone;
-import com.jme3.animation.Skeleton;
+import com.jme3.animation.AnimChannel;
+import com.jme3.animation.AnimControl;
+import com.jme3.animation.AnimEventListener;
+import com.jme3.animation.Animation;
+import com.jme3.animation.BoneTrack;
 import com.jme3.animation.SkeletonControl;
 import com.jme3.app.SimpleApplication;
-import com.jme3.light.AmbientLight;
-import com.jme3.light.DirectionalLight;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
-import com.jme3.scene.VertexBuffer;
-import com.jme3.scene.VertexBuffer.Format;
-import com.jme3.scene.VertexBuffer.Type;
-import com.jme3.scene.VertexBuffer.Usage;
-import com.jme3.scene.shape.Box;
-import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
+import com.jme3.scene.debug.SkeletonDebugger;
 
-public class TestCustomAnim extends SimpleApplication {
-
-    private Bone bone;
-    private Skeleton skeleton;
-    private Quaternion rotation = new Quaternion();
+public class TestCustomAnim extends SimpleApplication implements AnimEventListener{
+    
+    Humaniod human;
 
     public static void main(String[] args) {
         TestCustomAnim app = new TestCustomAnim();
@@ -70,101 +63,137 @@ public class TestCustomAnim extends SimpleApplication {
 
     @Override
     public void simpleInitApp() {
-
-        // Add an ambient light...
-        AmbientLight al = new AmbientLight();
-        rootNode.addLight(al);
-
-        // Add a directional light...
-        DirectionalLight dl = new DirectionalLight();
-        dl.setDirection(Vector3f.UNIT_XYZ.negate());
-        rootNode.addLight(dl);
-
-        // Create box (mesh source)...
-        Box box = new Box(1, 1, 1);
-
-        // Create bone buffers (Weights and Indices)...
-        // WE SEEM TO NEED THESE EMPTY BUFFERS
-        VertexBuffer weightsHW = new VertexBuffer(Type.HWBoneWeight);
-        VertexBuffer indicesHW = new VertexBuffer(Type.HWBoneIndex);
-        indicesHW.setUsage(Usage.CpuOnly);
-        weightsHW.setUsage(Usage.CpuOnly);
+        human = new Humaniod();
+        human.initPrototype();
         
-        // Set the buffers to our mesh
-        box.setBuffer(weightsHW);
-        box.setBuffer(indicesHW);
+        // Create geometry to add mesh to scene
+        Geometry geom = new Geometry("Custom Mesh", human.mesh);
+        human.model = new Node("Human");
         
-        // Setup bone weight buffer
-        FloatBuffer weights = FloatBuffer.allocate( box.getVertexCount() * 4 );
-        VertexBuffer weightsBuf = new VertexBuffer(Type.BoneWeight);
-        weightsBuf.setupData(Usage.CpuOnly, 4, Format.Float, weights);
-        box.setBuffer(weightsBuf);
-
-        // Setup bone index buffer
-        ByteBuffer indices = ByteBuffer.allocate( box.getVertexCount() * 4 );
-        VertexBuffer indicesBuf = new VertexBuffer(Type.BoneIndex);
-        indicesBuf.setupData(Usage.CpuOnly, 4, Format.UnsignedByte, indices);
-        box.setBuffer(indicesBuf);
-
-        // Create bind pose buffers
-        box.generateBindPose(true);
-
-        // Create skeleton with a single bone...
-        bone = new Bone("root");
-        bone.setBindTransforms(Vector3f.ZERO, Quaternion.IDENTITY, Vector3f.UNIT_XYZ);
-        bone.setUserControl(true);
-        skeleton = new Skeleton(new Bone[]{ bone });
-
-        // Assign all verticies to bone 0 with weight 1
-        for (int i = 0; i < box.getVertexCount() * 4; i += 4){
-            // assign vertex to bone index 0
-            indices.array()[i+0] = 0;
-            indices.array()[i+1] = 0;
-            indices.array()[i+2] = 0;
-            indices.array()[i+3] = 0;
-
-            // set weight to 1 only for first entry
-            weights.array()[i+0] = 1;
-            weights.array()[i+1] = 0;
-            weights.array()[i+2] = 0;
-            weights.array()[i+3] = 0;
-        }
-
-        // Maximum number of weights per bone is 1
-        box.setMaxNumWeights(1);
-        
-        Material boxMat = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md"); 
-            boxMat.setBoolean("UseMaterialColors", true); 
-            boxMat.setColor("Ambient", ColorRGBA.Green); 
-            boxMat.setColor("Diffuse", ColorRGBA.Green); 
-     
-        // Create model
-        Geometry geom = new Geometry("box", box);
-        geom.setMaterial(boxMat);
-        Node model = new Node("model");
-        model.attachChild(geom);
-
+        Material mat = assetManager.loadMaterial("Materials/VertexColorMat.j3m");
+        //mat.getAdditionalRenderState().setWireframe(true);
+        geom.setMaterial(mat);
+        human.model.attachChild(geom);
         // Create skeleton control
-        SkeletonControl skeletonControl = new SkeletonControl(skeleton);
-        model.addControl(skeletonControl);
-
-        rootNode.attachChild(model);
+        SkeletonControl skeletonControl = new SkeletonControl(human.skeleton);
+        human.model.addControl(skeletonControl);
+        rootNode.attachChild(human.model);
+        
+        flyCam.setMoveSpeed(25);
+        
+        SkeletonDebugger skeletonDebug = new SkeletonDebugger("skeleton", skeletonControl.getSkeleton());
+        Material mat2 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        mat2.setColor("Color", ColorRGBA.White);
+        mat2.getAdditionalRenderState().setDepthTest(false);
+        skeletonDebug.setMaterial(mat2);
+        skeletonDebug.getWires().setLineWidth(5);
+        human.model.attachChild(skeletonDebug);
     }
 
     @Override
     public void simpleUpdate(float tpf){
-        // Rotate around X axis
-        Quaternion rotate = new Quaternion();
-        rotate.fromAngleAxis(tpf, Vector3f.UNIT_X);
+        
+    }
+    
+    protected void initAnimation(){
+        // Create Animation Controller for the player
+        AnimControl playerControl; // you need one Control per model
+        //Node player = (Node) assetManager.loadModel("Models/Oto/Oto.mesh.xml"); // load a model
+        playerControl = human.model.getControl(AnimControl.class); // get control over this model
+        playerControl.addListener(this); // add listener
+        
+        // Animation controls effect which bones use animations
+        AnimChannel channel_walk = playerControl.createChannel();
+        
+        // Create a basic animation
+        Animation anim0 = new Animation();
+        
+        // Create bone tracks to store transformations i.e. 'KeyFrames'
+        /*
+        byte rootId = 0;
+        byte lHipId = 1;
+        byte lKneeId = 2;
+        byte lAnkleId = 3;
+        byte rHipId = 4;
+        byte rKneeId = 5;
+        byte rAnkleId = 6;
+        byte waistId = 7;
+        byte torsoId = 8;
+        byte chestId = 9;
+        byte lShoulderId = 10;
+        byte lElbowId = 11;
+        byte lWristId = 12;
+        byte rShoulderId = 13;
+        byte rElbowId = 14;
+        byte rWristId = 15;
+        byte headId = 16;
+        */
+        /* 
+        BoneTrack(int targetBoneIndex)
+        BoneTrack(int targetBoneIndex, float[] times, Vector3f[] translations, Quaternion[] rotations)
+        BoneTrack(int targetBoneIndex, float[] times, Vector3f[] translations, Quaternion[] rotations, Vector3f[] scales) */
+        
+        // Using the targetBoneIndex constructor
+        BoneTrack rootBoneTrack = new BoneTrack(0);
+        BoneTrack lHipBoneTrack = new BoneTrack(1);
+        BoneTrack lKneeBoneTrack = new BoneTrack(2);
+        BoneTrack lAnkleBoneTrack = new BoneTrack(3);
+        BoneTrack rHipBoneTrack = new BoneTrack(4);
+        BoneTrack rKneeBoneTrack = new BoneTrack(5);
+        BoneTrack rAnkleBoneTrack = new BoneTrack(6);
+        BoneTrack waistBoneTrack = new BoneTrack(7);
+        BoneTrack torsoBoneTrack = new BoneTrack(8);
+        BoneTrack chestBoneTrack = new BoneTrack(9);
+        BoneTrack lShoulderBoneTrack = new BoneTrack(10);
+        BoneTrack lElbowBoneTrack = new BoneTrack(11);
+        BoneTrack lWristBoneTrack = new BoneTrack(12);
+        BoneTrack rShoulderBoneTrack = new BoneTrack(13);
+        BoneTrack rElbowBoneTrack = new BoneTrack(14);
+        BoneTrack rWristBoneTrack = new BoneTrack(15);
+        BoneTrack headBoneTrack = new BoneTrack(16);
+        
+        // Need a bit of space for value tracking
+        
+        // Add data to tracks???
+        // setKeyframes(float[] times, Vector3f[] translations, Quaternion[] rotations, Vector3f[] scales)
+        lHipBoneTrack.setKeyframes(/*TIMES*/new float[]{0,1,2,3} , /*TRANSLATIONS*/new Vector3f[]{}, /*ROTATIONS*/new Quaternion[]{});
+        rHipBoneTrack.setKeyframes(/*TIMES*/new float[]{} , /*TRANSLATIONS*/new Vector3f[]{}, /*ROTATIONS*/new Quaternion[]{});
+        lShoulderBoneTrack.setKeyframes(/*TIMES*/new float[]{} , /*TRANSLATIONS*/new Vector3f[]{}, /*ROTATIONS*/new Quaternion[]{});
+        rShoulderBoneTrack.setKeyframes(/*TIMES*/new float[]{} , /*TRANSLATIONS*/new Vector3f[]{}, /*ROTATIONS*/new Quaternion[]{});
+        
+        // Add tracks to animation 
+        anim0.setTracks(new BoneTrack[]{
+            rootBoneTrack,
+            lHipBoneTrack,
+            lKneeBoneTrack,
+            lAnkleBoneTrack,
+            rHipBoneTrack,
+            rKneeBoneTrack,
+            rAnkleBoneTrack,
+            waistBoneTrack,
+            torsoBoneTrack,
+            chestBoneTrack,
+            lShoulderBoneTrack,
+            lElbowBoneTrack,
+            lWristBoneTrack,
+            rShoulderBoneTrack,
+            rElbowBoneTrack,
+            rWristBoneTrack,
+            headBoneTrack
+        });
+        
+        // Add the animation to the AnimControl
+        playerControl.addAnim(anim0);
+    }
 
-        // Combine rotation with previous
-        rotation.multLocal(rotate);
+    @Override
+    public void onAnimCycleDone(AnimControl control, AnimChannel channel, String animName) {
+        
+    }
 
-        // Set new rotation into bone
-        bone.setUserTransforms(Vector3f.ZERO, rotation, Vector3f.UNIT_XYZ);
-
-        // After changing skeleton transforms, must update world data
-        skeleton.updateWorldVectors();
+    @Override
+    public void onAnimChange(AnimControl control, AnimChannel channel, String animName) {
+        
     }
 
 }
