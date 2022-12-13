@@ -5,9 +5,9 @@
  */
 package MapDev;
 
+
 import com.jme3.app.SimpleApplication;
 import com.jme3.font.BitmapText;
-import com.jme3.light.AmbientLight;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.scene.Geometry;
@@ -15,7 +15,6 @@ import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.VertexBuffer;
 import com.jme3.scene.control.BillboardControl;
-import com.jme3.shader.VarType;
 import com.jme3.texture.Texture;
 import com.jme3.util.BufferUtils;
 import java.io.File;
@@ -24,31 +23,13 @@ import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
+// This import allows usage of the StringCharConst class
+import static Utility.StringCharConst.*;
 /**
  *
  * @author TigerSage
  */
 public class MapConversionTest  extends SimpleApplication {
-    
-    public static final String textReset = "\u001B[0m";
-    public static final String textBlack = "\u001B[30m";
-    public static final String textRed = "\u001B[31m";
-    public static final String textGreen = "\u001B[32m";
-    public static final String textYellow = "\u001B[33m";
-    public static final String textBlue = "\u001B[34m";
-    public static final String textPurple = "\u001B[35m";
-    public static final String textCyan = "\u001B[36m";
-    public static final String textWhite = "\u001B[37m";
-    
-    public static final String textBackBlack = "\u001B[40m";
-    public static final String textBackRed = "\u001B[41m";
-    public static final String textBackGreen = "\u001B[42m";
-    public static final String textBackYellow = "\u001B[43m";
-    public static final String textBackBlue = "\u001B[44m";
-    public static final String textBackPurple = "\u001B[45m";
-    public static final String textBackCyan = "\u001B[46m";
-    public static final String textBackWhite = "\u001B[47m";
     
     
     /**

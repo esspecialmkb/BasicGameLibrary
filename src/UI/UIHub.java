@@ -6,12 +6,15 @@
 package UI;
 
 import java.util.ArrayList;
+// This import allows usage of the StringCharConst class
+import static Utility.StringCharConst.*;
 
 /**
  *  Considering using this class to create ui objects
  * @author michael
  */
 public class UIHub extends UIElement{
+    
     ArrayList<String> messages = new ArrayList<>();
     
     ArrayList<UIElement> subscribers;
@@ -57,10 +60,11 @@ public class UIHub extends UIElement{
             mCount++;
         }
         if(mProc>0){
-            System.out.println(mProc + " Messages Processed");
+            //System.out.println(textGreen + "Found Comment tag..." + textReset);
+            System.out.println(textGreen + mProc + " Messages Processed" + textReset);
         }
         if(mCount>0){
-            System.out.println(mCount + " Messages Discarded");
+            System.out.println(textGreen + mCount + " Messages Discarded");
         }
     }
 }
