@@ -203,7 +203,6 @@ public class TestCustomAnimMesh extends SimpleApplication {
         human.headBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(0 * FastMath.DEG_TO_RAD, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
     }
     
-    // UNTESTED
     protected void readFrameData(){
         try {
             InputStreamReader reader = new InputStreamReader(new FileInputStream("MyFile.txt"), "UTF-16");
@@ -309,6 +308,8 @@ public class TestCustomAnimMesh extends SimpleApplication {
                 quatData = line.split(",");
                 System.out.println(line);
                 human.headBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngles(Float.parseFloat(quatData[1]), Float.parseFloat(quatData[2]), Float.parseFloat(quatData[3])), Vector3f.UNIT_XYZ);
+                
+            }else if(line.equals("KeyFrameData")){
                 
             }else{
                 reader.close();

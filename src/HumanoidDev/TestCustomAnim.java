@@ -51,11 +51,22 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.debug.SkeletonDebugger;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class TestCustomAnim extends SimpleApplication implements AnimEventListener{
     
     Humaniod human;
 
+    
+    
     public static void main(String[] args) {
         TestCustomAnim app = new TestCustomAnim();
         app.start();
@@ -93,6 +104,212 @@ public class TestCustomAnim extends SimpleApplication implements AnimEventListen
     @Override
     public void simpleUpdate(float tpf){
         
+    }
+    
+    // This function grabs key frame data objects from a file
+    protected HumanoidKeyFrameData readKeyFrame(BufferedReader bufferedReader){
+        // Prepare key frame data
+        HumanoidKeyFrameData frame0 = new HumanoidKeyFrameData();
+        boolean success = false;
+        String line;
+        
+        try {
+            line = bufferedReader.readLine();
+        
+            System.out.println(line);
+            
+            if(line.equals("FrameData")){
+                String[] quatData;
+                // If the first line checks out, grab our rotation data
+                
+                // Grab root rotation data
+                line = bufferedReader.readLine();
+                quatData = line.split(",");
+                frame0.rRot = new Quaternion().fromAngles(Float.parseFloat(quatData[1]), Float.parseFloat(quatData[2]), Float.parseFloat(quatData[3]));
+                
+                // Grab lhip
+                line = bufferedReader.readLine();
+                quatData = line.split(",");
+                frame0.lHRot = new Quaternion().fromAngles(Float.parseFloat(quatData[1]), Float.parseFloat(quatData[2]), Float.parseFloat(quatData[3]));
+                
+                // Grab lknee
+                line = bufferedReader.readLine();
+                quatData = line.split(",");
+                frame0.lKRot = new Quaternion().fromAngles(Float.parseFloat(quatData[1]), Float.parseFloat(quatData[2]), Float.parseFloat(quatData[3]));
+                
+                // Grab lankle
+                line = bufferedReader.readLine();
+                quatData = line.split(",");
+                frame0.lARot = new Quaternion().fromAngles(Float.parseFloat(quatData[1]), Float.parseFloat(quatData[2]), Float.parseFloat(quatData[3]));
+                
+                // Grab rhip
+                line = bufferedReader.readLine();
+                quatData = line.split(",");
+                frame0.rHRot = new Quaternion().fromAngles(Float.parseFloat(quatData[1]), Float.parseFloat(quatData[2]), Float.parseFloat(quatData[3]));
+                
+                // Grab rknee
+                line = bufferedReader.readLine();
+                quatData = line.split(",");
+                frame0.rKRot = new Quaternion().fromAngles(Float.parseFloat(quatData[1]), Float.parseFloat(quatData[2]), Float.parseFloat(quatData[3]));
+                
+                // Grab rankle
+                line = bufferedReader.readLine();
+                quatData = line.split(",");
+                frame0.rARot = new Quaternion().fromAngles(Float.parseFloat(quatData[1]), Float.parseFloat(quatData[2]), Float.parseFloat(quatData[3]));
+                
+                // Grab waist
+                line = bufferedReader.readLine();
+                quatData = line.split(",");
+                frame0.wRot = new Quaternion().fromAngles(Float.parseFloat(quatData[1]), Float.parseFloat(quatData[2]), Float.parseFloat(quatData[3]));
+                
+                // Grab torso
+                line = bufferedReader.readLine();
+                quatData = line.split(",");
+                frame0.tRot = new Quaternion().fromAngles(Float.parseFloat(quatData[1]), Float.parseFloat(quatData[2]), Float.parseFloat(quatData[3]));
+                
+                // Grab chest
+                line = bufferedReader.readLine();
+                quatData = line.split(",");
+                frame0.cRot = new Quaternion().fromAngles(Float.parseFloat(quatData[1]), Float.parseFloat(quatData[2]), Float.parseFloat(quatData[3]));
+                
+                // Grab lshoulder
+                line = bufferedReader.readLine();
+                quatData = line.split(",");
+                frame0.lSRot = new Quaternion().fromAngles(Float.parseFloat(quatData[1]), Float.parseFloat(quatData[2]), Float.parseFloat(quatData[3]));
+                
+                // Grab lelbow
+                line = bufferedReader.readLine();
+                quatData = line.split(",");
+                frame0.lERot = new Quaternion().fromAngles(Float.parseFloat(quatData[1]), Float.parseFloat(quatData[2]), Float.parseFloat(quatData[3]));
+                
+                // Grab lwrist
+                line = bufferedReader.readLine();
+                quatData = line.split(",");
+                frame0.lWRot = new Quaternion().fromAngles(Float.parseFloat(quatData[1]), Float.parseFloat(quatData[2]), Float.parseFloat(quatData[3]));
+                
+                // Grab rshoulder
+                line = bufferedReader.readLine();
+                quatData = line.split(",");
+                frame0.rSRot = new Quaternion().fromAngles(Float.parseFloat(quatData[1]), Float.parseFloat(quatData[2]), Float.parseFloat(quatData[3]));
+                
+                // Grab relbow
+                line = bufferedReader.readLine();
+                quatData = line.split(",");
+                frame0.rERot = new Quaternion().fromAngles(Float.parseFloat(quatData[1]), Float.parseFloat(quatData[2]), Float.parseFloat(quatData[3]));
+                
+                // Grab rwrist
+                line = bufferedReader.readLine();
+                quatData = line.split(",");
+                frame0.rWRot = new Quaternion().fromAngles(Float.parseFloat(quatData[1]), Float.parseFloat(quatData[2]), Float.parseFloat(quatData[3]));
+                
+                // Grab head
+                line = bufferedReader.readLine();
+                quatData = line.split(",");
+                frame0.hRot = new Quaternion().fromAngles(Float.parseFloat(quatData[1]), Float.parseFloat(quatData[2]), Float.parseFloat(quatData[3]));
+                
+                success = true;
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(TestCustomAnim.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        if(success){
+            return frame0;
+        }
+        return null;
+    }
+    
+    // This function starts the process of reading a file
+    protected void readAnimationData(AnimControl animControl){
+        Animation readAnim = new Animation();
+        
+        // Create bone tracks to store transformations i.e. 'KeyFrames'
+        /*
+        byte rootId = 0;
+        byte lHipId = 1;
+        byte lKneeId = 2;
+        byte lAnkleId = 3;
+        byte rHipId = 4;
+        byte rKneeId = 5;
+        byte rAnkleId = 6;
+        byte waistId = 7;
+        byte torsoId = 8;
+        byte chestId = 9;
+        byte lShoulderId = 10;
+        byte lElbowId = 11;
+        byte lWristId = 12;
+        byte rShoulderId = 13;
+        byte rElbowId = 14;
+        byte rWristId = 15;
+        byte headId = 16;
+        */
+        /* 
+        BoneTrack(int targetBoneIndex)
+        BoneTrack(int targetBoneIndex, float[] times, Vector3f[] translations, Quaternion[] rotations)
+        BoneTrack(int targetBoneIndex, float[] times, Vector3f[] translations, Quaternion[] rotations, Vector3f[] scales) */
+        
+        // Using the targetBoneIndex constructor
+        BoneTrack rootBoneTrack = new BoneTrack(0);
+        BoneTrack lHipBoneTrack = new BoneTrack(1);
+        BoneTrack lKneeBoneTrack = new BoneTrack(2);
+        BoneTrack lAnkleBoneTrack = new BoneTrack(3);
+        BoneTrack rHipBoneTrack = new BoneTrack(4);
+        BoneTrack rKneeBoneTrack = new BoneTrack(5);
+        BoneTrack rAnkleBoneTrack = new BoneTrack(6);
+        BoneTrack waistBoneTrack = new BoneTrack(7);
+        BoneTrack torsoBoneTrack = new BoneTrack(8);
+        BoneTrack chestBoneTrack = new BoneTrack(9);
+        BoneTrack lShoulderBoneTrack = new BoneTrack(10);
+        BoneTrack lElbowBoneTrack = new BoneTrack(11);
+        BoneTrack lWristBoneTrack = new BoneTrack(12);
+        BoneTrack rShoulderBoneTrack = new BoneTrack(13);
+        BoneTrack rElbowBoneTrack = new BoneTrack(14);
+        BoneTrack rWristBoneTrack = new BoneTrack(15);
+        BoneTrack headBoneTrack = new BoneTrack(16);
+        
+        // Prepare key frame data
+        HumanoidKeyFrameData frame0 = new HumanoidKeyFrameData();
+        HumanoidAnimationData animation = new HumanoidAnimationData();
+        
+        // Read data from the file
+        // Read the animation data directly from the file
+        animation.readAnimationData("MyFile.txt");
+        
+        // The bone tracks need the rotation and frame data in an array
+        //1 array per each bone track
+        // Our file format, however stores this data per frame
+        
+        
+        // Add data to tracks???
+        // setKeyframes(float[] times, Vector3f[] translations = new Vector3f[]{}, Quaternion[] rotations = new Quaternion[]{}, Vector3f[] scales = new Vector3f[]{})
+        
+        lHipBoneTrack.setKeyframes(/*TIMES*/animation.getTimeTrack() , /*TRANSLATIONS*/new Vector3f[]{}, /*ROTATIONS*/animation.getBoneTrackRotation(1));
+        rHipBoneTrack.setKeyframes(/*TIMES*/animation.getTimeTrack() , /*TRANSLATIONS*/new Vector3f[]{}, /*ROTATIONS*/animation.getBoneTrackRotation(1));
+        lShoulderBoneTrack.setKeyframes(/*TIMES*/animation.getTimeTrack() , /*TRANSLATIONS*/new Vector3f[]{}, /*ROTATIONS*/animation.getBoneTrackRotation(1));
+        rShoulderBoneTrack.setKeyframes(/*TIMES*/animation.getTimeTrack() , /*TRANSLATIONS*/new Vector3f[]{}, /*ROTATIONS*/new Quaternion[]{});
+        
+        // Add tracks to animation 
+        readAnim.setTracks(new BoneTrack[]{
+            rootBoneTrack,
+            lHipBoneTrack,
+            lKneeBoneTrack,
+            lAnkleBoneTrack,
+            rHipBoneTrack,
+            rKneeBoneTrack,
+            rAnkleBoneTrack,
+            waistBoneTrack,
+            torsoBoneTrack,
+            chestBoneTrack,
+            lShoulderBoneTrack,
+            lElbowBoneTrack,
+            lWristBoneTrack,
+            rShoulderBoneTrack,
+            rElbowBoneTrack,
+            rWristBoneTrack,
+            headBoneTrack
+        });
+        
+        // Add the animation to the AnimControl
+        animControl.addAnim(readAnim);
     }
     
     protected void initAnimation(){
