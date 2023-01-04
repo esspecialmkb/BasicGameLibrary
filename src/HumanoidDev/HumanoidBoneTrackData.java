@@ -38,16 +38,17 @@ public class HumanoidBoneTrackData {
     BoneTrack rWristBoneTrack = new BoneTrack(15);
     BoneTrack headBoneTrack = new BoneTrack(16);
     
-    public void prepareBoneTracks(BufferedReader bufferedReader){
-        animation = new Animation();
+    public void buildTracks(){
+        
+    }
+    
+    public void prepareBoneTracks(){
+        animation = new Animation("Test",8f);
         
         // Add data to tracks???
         // setKeyframes(float[] times, Vector3f[] translations = new Vector3f[]{}, Quaternion[] rotations = new Quaternion[]{}, Vector3f[] scales = new Vector3f[]{})
         
-        lHipBoneTrack.setKeyframes(/*TIMES*/new float[]{} , /*TRANSLATIONS*/new Vector3f[]{}, /*ROTATIONS*/new Quaternion[]{});
-        rHipBoneTrack.setKeyframes(/*TIMES*/new float[]{} , /*TRANSLATIONS*/new Vector3f[]{}, /*ROTATIONS*/new Quaternion[]{});
-        lShoulderBoneTrack.setKeyframes(/*TIMES*/new float[]{} , /*TRANSLATIONS*/new Vector3f[]{}, /*ROTATIONS*/new Quaternion[]{});
-        rShoulderBoneTrack.setKeyframes(/*TIMES*/new float[]{} , /*TRANSLATIONS*/new Vector3f[]{}, /*ROTATIONS*/new Quaternion[]{});
+        buildTracks();
         
         // Add tracks to animation 
         animation.setTracks(new BoneTrack[]{

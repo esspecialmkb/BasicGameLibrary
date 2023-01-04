@@ -41,11 +41,14 @@ import com.jme3.animation.AnimChannel;
 import com.jme3.animation.AnimControl;
 import com.jme3.animation.AnimEventListener;
 import com.jme3.animation.Animation;
+import com.jme3.animation.Bone;
 import com.jme3.animation.BoneTrack;
+import com.jme3.animation.Skeleton;
 import com.jme3.animation.SkeletonControl;
 import com.jme3.app.SimpleApplication;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
@@ -58,14 +61,149 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class TestCustomAnim extends SimpleApplication implements AnimEventListener{
     
     Humaniod human;
-
     
+    HumanoidKeyFrameData[] frames;
+    public class TestAnimationData extends HumanoidBoneTrackData{
+        @Override
+        public void buildTracks(){
+            
+            rootBoneTrack.setKeyframes( /*TIMES*/new float[]{0,2,4,6,8f} , 
+                                        /*TRANSLATIONS*/new Vector3f[]{ new Vector3f(),
+                                                                        new Vector3f(),
+                                                                        new Vector3f(),
+                                                                        new Vector3f(0,0,0),
+                                                                        new Vector3f()}, 
+                                        /*ROTATIONS*/new Quaternion[]{  new Quaternion().fromAngles(0,0,0),
+                                                                        new Quaternion().fromAngles(0,90*FastMath.RAD_TO_DEG,0),
+                                                                        new Quaternion().fromAngles(0,180*FastMath.RAD_TO_DEG,0),
+                                                                        new Quaternion().fromAngles(0,270*FastMath.RAD_TO_DEG,0),
+                                                                        new Quaternion().fromAngles(0,0,0)
+                                        });
+            
+            lHipBoneTrack.setKeyframes( /*TIMES*/new float[]{0,.80f} , 
+                                        /*TRANSLATIONS*/new Vector3f[]{ new Vector3f(),
+                                                                        new Vector3f()}, 
+                                        /*ROTATIONS*/new Quaternion[]{  new Quaternion().fromAngles(0,0,0),
+                                                                        new Quaternion().fromAngles(0,0,0)});
+            
+            lKneeBoneTrack.setKeyframes( /*TIMES*/new float[]{0,.80f} , 
+                                        /*TRANSLATIONS*/new Vector3f[]{ new Vector3f(),
+                                                                        new Vector3f()}, 
+                                        /*ROTATIONS*/new Quaternion[]{  new Quaternion().fromAngles(0,0,0),
+                                                                        new Quaternion().fromAngles(0,0,0)});
+            
+            lAnkleBoneTrack.setKeyframes( /*TIMES*/new float[]{0,.80f} , 
+                                        /*TRANSLATIONS*/new Vector3f[]{ new Vector3f(),
+                                                                        new Vector3f()}, 
+                                        /*ROTATIONS*/new Quaternion[]{  new Quaternion().fromAngles(0,0,0),
+                                                                        new Quaternion().fromAngles(0,0,0)});
+            
+            rHipBoneTrack.setKeyframes( /*TIMES*/new float[]{0,.80f} , 
+                                        /*TRANSLATIONS*/new Vector3f[]{ new Vector3f(),
+                                                                        new Vector3f()}, 
+                                        /*ROTATIONS*/new Quaternion[]{  new Quaternion().fromAngles(0,0,0),
+                                                                        new Quaternion().fromAngles(0,0,0)});
+            
+            rKneeBoneTrack.setKeyframes( /*TIMES*/new float[]{0,.80f} , 
+                                        /*TRANSLATIONS*/new Vector3f[]{ new Vector3f(),
+                                                                        new Vector3f()}, 
+                                        /*ROTATIONS*/new Quaternion[]{  new Quaternion().fromAngles(0,0,0),
+                                                                        new Quaternion().fromAngles(0,0,0)});
+            
+            rAnkleBoneTrack.setKeyframes( /*TIMES*/new float[]{0,.80f} , 
+                                        /*TRANSLATIONS*/new Vector3f[]{ new Vector3f(),
+                                                                        new Vector3f()}, 
+                                        /*ROTATIONS*/new Quaternion[]{  new Quaternion().fromAngles(0,0,0),
+                                                                        new Quaternion().fromAngles(0,0,0)});
+                        
+            waistBoneTrack.setKeyframes( /*TIMES*/new float[]{0,.80f} , 
+                                        /*TRANSLATIONS*/new Vector3f[]{ new Vector3f(),
+                                                                        new Vector3f()}, 
+                                        /*ROTATIONS*/new Quaternion[]{  new Quaternion().fromAngles(0,0,0),
+                                                                        new Quaternion().fromAngles(0,0,0)});
+            
+            torsoBoneTrack.setKeyframes( /*TIMES*/new float[]{0,.80f} , 
+                                        /*TRANSLATIONS*/new Vector3f[]{ new Vector3f(),
+                                                                        new Vector3f()}, 
+                                        /*ROTATIONS*/new Quaternion[]{  new Quaternion().fromAngles(0,0,0),
+                                                                        new Quaternion().fromAngles(0,0,0)});
+            
+            chestBoneTrack.setKeyframes( /*TIMES*/new float[]{0,.80f} , 
+                                        /*TRANSLATIONS*/new Vector3f[]{ new Vector3f(),
+                                                                        new Vector3f()}, 
+                                        /*ROTATIONS*/new Quaternion[]{  new Quaternion().fromAngles(0,0,0),
+                                                                        new Quaternion().fromAngles(0,0,0)});
+            
+            lShoulderBoneTrack.setKeyframes( /*TIMES*/new float[]{0,.80f} , 
+                                        /*TRANSLATIONS*/new Vector3f[]{ new Vector3f(),
+                                                                        new Vector3f()}, 
+                                        /*ROTATIONS*/new Quaternion[]{  new Quaternion().fromAngles(0,0,0),
+                                                                        new Quaternion().fromAngles(0,0,0)});
+            
+            lElbowBoneTrack.setKeyframes( /*TIMES*/new float[]{0,.80f} , 
+                                        /*TRANSLATIONS*/new Vector3f[]{ new Vector3f(),
+                                                                        new Vector3f()}, 
+                                        /*ROTATIONS*/new Quaternion[]{  new Quaternion().fromAngles(0,0,0),
+                                                                        new Quaternion().fromAngles(0,0,0)});
+            
+            lWristBoneTrack.setKeyframes( /*TIMES*/new float[]{0,.80f} , 
+                                        /*TRANSLATIONS*/new Vector3f[]{ new Vector3f(),
+                                                                        new Vector3f()}, 
+                                        /*ROTATIONS*/new Quaternion[]{  new Quaternion().fromAngles(0,0,0),
+                                                                        new Quaternion().fromAngles(0,0,0)});
+            
+            rShoulderBoneTrack.setKeyframes( /*TIMES*/new float[]{0,.80f} , 
+                                        /*TRANSLATIONS*/new Vector3f[]{ new Vector3f(),
+                                                                        new Vector3f()}, 
+                                        /*ROTATIONS*/new Quaternion[]{  new Quaternion().fromAngles(0,0,0),
+                                                                        new Quaternion().fromAngles(0,0,0)});
+            
+            rElbowBoneTrack.setKeyframes( /*TIMES*/new float[]{0,.80f} , 
+                                        /*TRANSLATIONS*/new Vector3f[]{ new Vector3f(),
+                                                                        new Vector3f()}, 
+                                        /*ROTATIONS*/new Quaternion[]{  new Quaternion().fromAngles(0,0,0),
+                                                                        new Quaternion().fromAngles(0,0,0)});
+            
+            rWristBoneTrack.setKeyframes( /*TIMES*/new float[]{0,.80f} , 
+                                        /*TRANSLATIONS*/new Vector3f[]{ new Vector3f(),
+                                                                        new Vector3f()}, 
+                                        /*ROTATIONS*/new Quaternion[]{  new Quaternion().fromAngles(0,0,0),
+                                                                        new Quaternion().fromAngles(0,0,0)});
+            
+            headBoneTrack.setKeyframes( /*TIMES*/new float[]{0,.80f} , 
+                                        /*TRANSLATIONS*/new Vector3f[]{ new Vector3f(),
+                                                                        new Vector3f()}, 
+                                        /*ROTATIONS*/new Quaternion[]{  new Quaternion().fromAngles(0,0,0),
+                                                                        new Quaternion().fromAngles(0,0,0)});
+        }
+    }
+
+    public class HumanoidRunAnimationData extends HumanoidBoneTrackData{
+        @Override
+        public void buildTracks(){
+            lHipBoneTrack.setKeyframes( /*TIMES*/new float[]{0,20,40,60} , 
+                                        /*TRANSLATIONS*/new Vector3f[]{ new Vector3f(),
+                                                                        new Vector3f(),
+                                                                        new Vector3f(),
+                                                                        new Vector3f()}, 
+                                        /*ROTATIONS*/new Quaternion[]{  new Quaternion().fromAngles(0,0,0),
+                                                                        new Quaternion().fromAngles(0,0,0),
+                                                                        new Quaternion().fromAngles(0,0,0),
+                                                                        new Quaternion().fromAngles(0,0,0)});
+            
+            rHipBoneTrack.setKeyframes(/*TIMES*/new float[]{} , /*TRANSLATIONS*/new Vector3f[]{}, /*ROTATIONS*/new Quaternion[]{});
+            lShoulderBoneTrack.setKeyframes(/*TIMES*/new float[]{} , /*TRANSLATIONS*/new Vector3f[]{}, /*ROTATIONS*/new Quaternion[]{});
+            rShoulderBoneTrack.setKeyframes(/*TIMES*/new float[]{} , /*TRANSLATIONS*/new Vector3f[]{}, /*ROTATIONS*/new Quaternion[]{});
+        }
+    }
     
     public static void main(String[] args) {
         TestCustomAnim app = new TestCustomAnim();
@@ -85,13 +223,17 @@ public class TestCustomAnim extends SimpleApplication implements AnimEventListen
         //mat.getAdditionalRenderState().setWireframe(true);
         geom.setMaterial(mat);
         human.model.attachChild(geom);
+        
         // Create skeleton control
         SkeletonControl skeletonControl = new SkeletonControl(human.skeleton);
+        skeletonControl.setEnabled(true);
+        
         human.model.addControl(skeletonControl);
         rootNode.attachChild(human.model);
         
         flyCam.setMoveSpeed(25);
         
+        // Debug skeleton setup
         SkeletonDebugger skeletonDebug = new SkeletonDebugger("skeleton", skeletonControl.getSkeleton());
         Material mat2 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         mat2.setColor("Color", ColorRGBA.White);
@@ -99,11 +241,48 @@ public class TestCustomAnim extends SimpleApplication implements AnimEventListen
         skeletonDebug.setMaterial(mat2);
         skeletonDebug.getWires().setLineWidth(5);
         human.model.attachChild(skeletonDebug);
+        
+        // Debugging animation system
+        human.model.addControl(new AnimControl(human.skeleton));
+        AnimControl control = human.model.getControl(AnimControl.class);
+        Skeleton skeleton = control.getSkeleton();
+        int boneCount = skeleton.getBoneCount();
+        
+        
+        TestAnimationData anim = new TestAnimationData();
+        anim.prepareBoneTracks();
+        control.addAnim(anim.animation);
+        control.addListener(this);
+        AnimChannel animChannel = control.createChannel();
+        animChannel.setAnim("Test");
+        System.out.println("Num bones: "+ skeleton.getBoneCount());
+        for(int b = 0; b < boneCount; b++){
+            Bone bone = skeleton.getBone(b);
+            
+            String name = bone.getName();
+            System.out.println("Bone "+b+": \" "+name+" \"");
+            Vector3f bindPosition = bone.getBindPosition();
+            Quaternion bindRotation = bone.getBindRotation();
+            Vector3f localPosition = bone.getLocalPosition();
+            Quaternion localRotation = bone.getLocalRotation();
+            
+            ArrayList<Bone> children = bone.getChildren();
+            System.out.println("Children: ");
+            for(Bone child :children){
+                System.out.println("    "+child.getName());
+            }
+        }
+        
+        Animation anim1 = control.getAnim("Test");
+        System.out.println("Animation name" +anim1.getName());
+        
     }
-
+    
     @Override
     public void simpleUpdate(float tpf){
         
+        
+        //human.skeleton.updateWorldVectors();
     }
     
     // This function grabs key frame data objects from a file
@@ -405,12 +584,13 @@ public class TestCustomAnim extends SimpleApplication implements AnimEventListen
 
     @Override
     public void onAnimCycleDone(AnimControl control, AnimChannel channel, String animName) {
-        
+        Bone bone = control.getSkeleton().getBone(1);
+        System.out.println("Anim Cycle Done" + bone.getName());
     }
 
     @Override
     public void onAnimChange(AnimControl control, AnimChannel channel, String animName) {
-        
+        System.out.println("Anim Change");
     }
 
 }
