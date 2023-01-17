@@ -37,6 +37,10 @@ package HumanoidDev;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import HumanoidAnimation.HumanoidKeyFrameData;
+import HumanoidAnimation.HumanoidBoneTrackData;
+import HumanoidAnimation.HumanoidAnimationData;
+import HumanoidAnimation.HumanoidRunAnimationData;
 import com.jme3.animation.AnimChannel;
 import com.jme3.animation.AnimControl;
 import com.jme3.animation.AnimEventListener;
@@ -186,24 +190,7 @@ public class TestCustomAnim extends SimpleApplication implements AnimEventListen
         }
     }
 
-    public class HumanoidRunAnimationData extends HumanoidBoneTrackData{
-        @Override
-        public void buildTracks(){
-            lHipBoneTrack.setKeyframes( /*TIMES*/new float[]{0,20,40,60} , 
-                                        /*TRANSLATIONS*/new Vector3f[]{ new Vector3f(),
-                                                                        new Vector3f(),
-                                                                        new Vector3f(),
-                                                                        new Vector3f()}, 
-                                        /*ROTATIONS*/new Quaternion[]{  new Quaternion().fromAngles(0,0,0),
-                                                                        new Quaternion().fromAngles(0,0,0),
-                                                                        new Quaternion().fromAngles(0,0,0),
-                                                                        new Quaternion().fromAngles(0,0,0)});
-            
-            rHipBoneTrack.setKeyframes(/*TIMES*/new float[]{} , /*TRANSLATIONS*/new Vector3f[]{}, /*ROTATIONS*/new Quaternion[]{});
-            lShoulderBoneTrack.setKeyframes(/*TIMES*/new float[]{} , /*TRANSLATIONS*/new Vector3f[]{}, /*ROTATIONS*/new Quaternion[]{});
-            rShoulderBoneTrack.setKeyframes(/*TIMES*/new float[]{} , /*TRANSLATIONS*/new Vector3f[]{}, /*ROTATIONS*/new Quaternion[]{});
-        }
-    }
+    
     
     public static void main(String[] args) {
         TestCustomAnim app = new TestCustomAnim();
@@ -249,7 +236,7 @@ public class TestCustomAnim extends SimpleApplication implements AnimEventListen
         int boneCount = skeleton.getBoneCount();
         
         
-        TestAnimationData anim = new TestAnimationData();
+        HumanoidRunAnimationData anim = new HumanoidRunAnimationData();
         anim.prepareBoneTracks();
         control.addAnim(anim.animation);
         control.addListener(this);

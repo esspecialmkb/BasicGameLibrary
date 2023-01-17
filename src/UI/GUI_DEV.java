@@ -323,6 +323,7 @@ public class GUI_DEV extends SimpleApplication {
         cursorPosition = inputManager.getCursorPosition();
         uiRoot.collideWith((int)cursorPosition.x, (int)cursorPosition.y);
         uiRoot.uiTick();
+        uiScroll0.onUpdate();
     }
     
     // Event Listeners

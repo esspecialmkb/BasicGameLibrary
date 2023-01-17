@@ -27,7 +27,7 @@ public class UIHub extends UIElement{
     // This is a prototype Publish-Subscibe Server/Hub - tailored to the GUI
     public void post(int topic, int id, String message){
         // Clients use this to post messages to hub
-        System.out.println("UIHUB::POST - Topic: "+topic+", id: "+id+", Message: "+message);
+        System.out.println(textRed+"UIHUB::POST - Topic: "+textWhite+topic+textRed+", id: "+textWhite+id+", Message: "+textGreen+message+textReset);
         messages.add(topic+"::"+id+"::"+message);
     }
 
@@ -53,8 +53,13 @@ public class UIHub extends UIElement{
             String[] split = get.split("::");
             // 0: topic, 1: id, 2:message
             
+            // Check the number of items resulting from our split
+            // If we have more than 3 items then we know there is extra data...            
+            if(split.length > 3){
+                // What we do with this extra data depends on the message
+            }
             // PROCESS MESSAGES WE CARE ABOUT
-            System.out.println(split[2]);
+            System.out.println(textYellow+split[2]+textReset);
             // Discard message when done
             messages.remove(0);
             mCount++;
@@ -64,7 +69,7 @@ public class UIHub extends UIElement{
             System.out.println(textGreen + mProc + " Messages Processed" + textReset);
         }
         if(mCount>0){
-            System.out.println(textGreen + mCount + " Messages Discarded");
+            System.out.println(textGreen + mCount + " Messages Discarded" + textReset);
         }
     }
 }

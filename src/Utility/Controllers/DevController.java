@@ -18,6 +18,9 @@ import com.jme3.input.event.MouseMotionEvent;
 import com.jme3.input.event.TouchEvent;
 import java.util.List;
 
+// This import allows usage of the StringCharConst class
+import static Utility.StringCharConst.*;
+
 /**
  * Devlopment prototype of RawInputListener implementation.
  * 
@@ -42,12 +45,12 @@ public class DevController implements RawInputListener{
     
     @Override
     public void beginInput() {
-        System.out.println("BEGIN INPUT");
+        //System.out.println("BEGIN INPUT");
     }
 
     @Override
     public void endInput() {
-        System.out.println("END INPUT");
+        //System.out.println("END INPUT");
     }
 
     @Override
@@ -81,7 +84,7 @@ public class DevController implements RawInputListener{
 
     @Override
     public void onJoyButtonEvent(JoyButtonEvent evt) {
-        System.out.println("Joystick Button Event");
+        System.out.println(textRed+"Joystick Button Event"+textReset);
 
         JoystickButton button = evt.getButton();
         int buttonId = button.getButtonId();
@@ -100,7 +103,7 @@ public class DevController implements RawInputListener{
 
     @Override
     public void onMouseMotionEvent(MouseMotionEvent evt) {
-        System.out.println("Mouse Motion Event");
+        System.out.println(textRed+"Mouse Motion Event"+textReset);
 
         int dx = evt.getDX();
         int dy = evt.getDY();
@@ -115,7 +118,7 @@ public class DevController implements RawInputListener{
 
     @Override
     public void onMouseButtonEvent(MouseButtonEvent evt) {
-        System.out.println("Mouse Button Event");
+        System.out.println(textRed+"Mouse Button Event"+textReset);
 
         int buttonIndex = evt.getButtonIndex();
         int x = evt.getX();
@@ -126,7 +129,7 @@ public class DevController implements RawInputListener{
 
     @Override
     public void onKeyEvent(KeyInputEvent evt) {
-        System.out.println("Key Input Event");
+        System.out.println(textRed+"Key Input Event"+textReset);
 
         int keyCode = evt.getKeyCode();
         boolean pressed = evt.isPressed();
@@ -136,7 +139,7 @@ public class DevController implements RawInputListener{
 
     @Override
     public void onTouchEvent(TouchEvent evt) {
-        System.out.println("Touch Event");
+        System.out.println(textRed+"Touch Event"+textReset);
 
         // TO BE IMPLEMENTED
     }

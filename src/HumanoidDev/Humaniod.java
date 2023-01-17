@@ -8,6 +8,7 @@ package HumanoidDev;
 import UI.MeshElement;
 import com.jme3.animation.Bone;
 import com.jme3.animation.Skeleton;
+import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Mesh;
@@ -1372,7 +1373,7 @@ public class Humaniod{
 
         lHipBone = new Bone("l hip");
         //lHipRotation = new Quaternion().fromAngleAxis(0, Vector3f.UNIT_X);
-        lHipBone.setBindTransforms(new Vector3f(leg.x/2,-pelvis.y/2,0), Quaternion.IDENTITY, Vector3f.UNIT_XYZ);
+        lHipBone.setBindTransforms(new Vector3f(leg.x/2,-pelvis.y/2,0), new Quaternion().fromAngles(0 * FastMath.DEG_TO_RAD,0,0), Vector3f.UNIT_XYZ);
         lHipBone.setUserControl(userControl);
 
         lKneeBone = new Bone("l knee");
@@ -1389,7 +1390,7 @@ public class Humaniod{
         
         rHipBone = new Bone("r hip");
         //rHipRotation = new Quaternion().fromAngleAxis(0, Vector3f.UNIT_X);
-        rHipBone.setBindTransforms(new Vector3f(-leg.x/2,-pelvis.y/2,0), Quaternion.IDENTITY, Vector3f.UNIT_XYZ);
+        rHipBone.setBindTransforms(new Vector3f(-leg.x/2,-pelvis.y/2,0), new Quaternion().fromAngles(0 * FastMath.DEG_TO_RAD,0,0), Vector3f.UNIT_XYZ);
         rHipBone.setUserControl(userControl);
 
         rKneeBone = new Bone("r knee");

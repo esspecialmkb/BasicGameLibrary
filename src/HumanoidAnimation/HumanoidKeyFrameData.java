@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package HumanoidDev;
+package HumanoidAnimation;
 
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
@@ -19,14 +19,21 @@ public class HumanoidKeyFrameData{
     public boolean dataFlag[] = new boolean[17];
 
     public Quaternion rRot;
-
+    public float rootXRot,rootYRot,rootZRot;
+    
     public Quaternion lHRot;
     public Quaternion lKRot;
     public Quaternion lARot;
-
+    public float lHipXRot,lHipYRot,lHipZRot;
+    public float lKneeXRot,lKneeYRot,lKneeZRot;
+    public float lAnkleXRot,lAnkleYRot,lAnkleZRot;
+    
     public Quaternion rHRot;
     public Quaternion rKRot;
     public Quaternion rARot;
+    public float rHipXRot,rHipYRot,rHipZRot;
+    public float rKneeXRot,rKneeYRot,rKneeZRot;
+    public float rAnkleXRot,rAnkleYRot,rAnkleZRot;
 
     public Quaternion wRot;
     public Quaternion tRot;

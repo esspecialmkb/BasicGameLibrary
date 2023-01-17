@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package HumanoidDev;
+package HumanoidAnimation;
 
 import com.jme3.math.Quaternion;
 import java.io.BufferedReader;

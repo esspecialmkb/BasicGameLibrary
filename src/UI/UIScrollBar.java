@@ -210,5 +210,24 @@ public class UIScrollBar extends UIElement{
         scrollButton.buildMesh(sBTMesh);
         //this.addChild(scrollBar);
     }
-
+    
+    // UPDATE
+    @Override
+    public void onUpdate(){
+        // Recursively call all children...
+        if(children != null){
+            for(UIElement c : children){
+                c.onUpdate();
+            }
+        }
+        // Check UIHub for messages
+        ui.ping(0);
+        
+        // We need to figure out where the scroll button needs to be
+        // 
+        float range = valMax - valMin;
+        float div = (value*width)/valMax;
+        scrollButton.uiNode.setLocalTranslation(div,0,5);
+        
+    }
 }
