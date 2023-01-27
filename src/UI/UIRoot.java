@@ -47,7 +47,7 @@ public class UIRoot extends UIElement{
     public boolean collideWith(int x, int y){
         // It "might" be good to send mouse position updates?
         // The ui hub uses "::" as a terminator string, x and y will be the parameters of the message
-        ui.post(1, this.id, "MOUSE_POS::"+x+"::"+y);
+        //  ui.post(1, this.id, "MOUSE_POS::"+x+"::"+y);
         // Cache the result
         boolean result = false;
 
@@ -62,7 +62,7 @@ public class UIRoot extends UIElement{
 
                         if(result){
                             //LET THE UIHUB KNOW THAT WE ARE HOVERING OVER A NEW OBJECT!!!
-                            ui.post(1, hoverChild.id, hoverChild.name + "::MOUSEOVER");
+                            ui.post(2, hoverChild.id, hoverChild.name + "::MOUSEOVER");
                             lastMouseX = x;
                             lastMouseY = y;
                             return true;
@@ -79,7 +79,7 @@ public class UIRoot extends UIElement{
                 // We will let the ui hub track hover status
                 if(isHoverNotify == false){
                     //System.out.println(this.name + " Hover With " + lastHover.name);
-                    ui.post(1, lastHover.id, lastHover.name + "::HOVER");
+                    ui.post(2, lastHover.id, lastHover.name + "::HOVER");
                     isHoverNotify = true;
                 }else{
 
@@ -91,7 +91,7 @@ public class UIRoot extends UIElement{
                 // If we reach here, we are no longer hovering over an object within the lastHover object
                 isHover = false;
                 isHoverNotify = false;
-                ui.post(1, lastHover.id, lastHover.name + "::NO_HOVER");
+                ui.post(2, lastHover.id, lastHover.name + "::NO_HOVER");
             }
         }//END IF(ISHOVER)
 
@@ -109,7 +109,7 @@ public class UIRoot extends UIElement{
                 lastMouseX = x;
                 lastMouseY = y;
                 //System.out.println(this.name + " Collide With " + lastHover.name);
-                ui.post(1, lastHover.id, lastHover.name + "::MOUSEOVER");
+                ui.post(2, lastHover.id, lastHover.name + "::MOUSEOVER");
                 return true;
             }
         }
@@ -129,7 +129,7 @@ public class UIRoot extends UIElement{
     protected ActionListener actionListener = new ActionListener(){
         public void onAction(String name, boolean pressed, float tpf){
             //System.out.println(name + " = " + pressed);
-            ui.post(1,-1,name + " " +pressed);
+            ui.post(3,-1,name + " " +pressed);
         }
     };
     protected AnalogListener analogListener = new AnalogListener() {

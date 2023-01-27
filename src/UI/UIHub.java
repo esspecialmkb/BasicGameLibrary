@@ -18,6 +18,11 @@ public class UIHub extends UIElement{
     ArrayList<String> messages = new ArrayList<>();
     
     ArrayList<UIElement> subscribers;
+    
+    // The UIHub needs to keep track of whatever element was last hovered over
+    // When click events happen, we will use this info to determine what (on the UI) was clicked
+    String currentUIHover;    
+    
     /*
     Hub topic ids
     0 - UI interaction (Hover)
@@ -25,6 +30,7 @@ public class UIHub extends UIElement{
     */
     
     // This is a prototype Publish-Subscibe Server/Hub - tailored to the GUI
+    // Currently, the post method spits out a copy of the incoming message
     public void post(int topic, int id, String message){
         // Clients use this to post messages to hub
         System.out.println(textRed+"UIHUB::POST - Topic: "+textWhite+topic+textRed+", id: "+textWhite+id+", Message: "+textGreen+message+textReset);
@@ -60,6 +66,37 @@ public class UIHub extends UIElement{
             }
             // PROCESS MESSAGES WE CARE ABOUT
             System.out.println(textYellow+split[2]+textReset);
+            
+            // Check the topic of the message
+            // 0 - UI Hub Assignments
+            // 2 - Mouse hover events
+            // 3 - Mouse input events
+            switch(Integer.getInteger(split[0])){
+                case 0:
+                    break;
+                case 1:
+                    break;
+                case 2:
+                    // The UIHub will receive either...
+                    // MOUSEOVER,
+                    // HOVER, or
+                    // NO_HOVER
+                    // We need to assign the element hover tag for MouseOver and Hover events
+                    // We need to clear that tag for No_Hover events
+                    if(split[3].equals("HOVER")||split[3].equals("MOUSEOVER")){
+                        currentUIHover = split[2];
+                    }else if(split[3].equals("NO_HOVER")){
+                        currentUIHover = "null";
+                    }
+                    
+                    break;
+                case 3:
+                    // We will receive mouse clicks in two phases...
+                    // Mouse (L,M or R) true
+                    // Mouse (L,M or R) false
+                    
+                    break;
+            }
             // Discard message when done
             messages.remove(0);
             mCount++;
