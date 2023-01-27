@@ -48,111 +48,37 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         MoveDown,
         RotateLeft,
         RotateRight,
-        MouseSelect
+        MouseSelect,
         
         // We will need additional inputs...
+        RotateBonePos,
+        RotateBoneNeg,
+        SelectAxisX,
+        SelectAxisY,
+        SelectAxisZ,
         
         // Create PoseFrame
+        CreatePoseFrame,
         // Edit PoseFrame
+        EditPoseFrame,
         // Delete PoseFrame
+        DeletePoseFrame,
         
         // Create BoneTracks (from PoseFrame data)
-    }
-    
-    // Define the frame data that will be used to construct bonetrack data
-    public class PoseFrame{
-        int id;
-        int frameNumber;
-        float time;
+        UpdateBoneTracks,
         
-        //Root
-        float[] rootRot;
-        float[] rootTrans;
-        float[] rootScale;
+        // Manipulate the axis incrementation value
+        RotateValueIncr,
+        RotateValueDecr,
         
-        // L Hip
-        float[] lHipRot;
-        float[] lHipTrans;
-        float[] lHipScale;
-        
-        // L Knee
-        float[] lKneeRot;
-        float[] lKneeTrans;
-        float[] lKneeScale;
-        
-        // L Ankle
-        float[] lAnkleRot;
-        float[] lAnkleTrans;
-        float[] lAnkleScale;
-        
-        // R Hip
-        float[] rHipRot;
-        float[] rHipTrans;
-        float[] rHipScale;
-        
-        // R Knee
-        float[] rKneeRot;
-        float[] rKneeTrans;
-        float[] rKneeScale;
-        
-        // R Ankle
-        float[] rAnkleRot;
-        float[] rAnkleTrans;
-        float[] rAnkleScale;
-        
-        // Waist
-        float[] waistRot;
-        float[] waistTrans;
-        float[] waistScale;
-        
-        // Torso
-        float[] torsoRot;
-        float[] torsoTrans;
-        float[] torsoScale;
-        
-        // Chest
-        float[] chestRot;
-        float[] chestTrans;
-        float[] chestScale;
-        
-        // L Shoulder
-        float[] lShoulderRot;
-        float[] lShoulderTrans;
-        float[] lShoulderScale;
-        
-        // L Elbow
-        float[] lElbowRot;
-        float[] lElbowTrans;
-        float[] lElbowScale;
-        
-        // L Wrist
-        float[] lWristRot;
-        float[] lWristTrans;
-        float[] lWristScale;
-        
-        // R Shoulder
-        float[] rShoulderRot;
-        float[] rShoulderTrans;
-        float[] rShoulderScale;
-        
-        // R Elbow
-        float[] rElbowRot;
-        float[] rElbowTrans;
-        float[] rElbowScale;
-        
-        // R Wrist
-        float[] rWristRot;
-        float[] rWristTrans;
-        float[] rWristScale;
-        
-        // Head
-        float[] headRot;
-        float[] headTrans;
-        float[] headScale;
+        // Navigate the pose frames
+        NextPoseFrame,
+        PrevPoseFrame
     }
     
     // We need a mutable list of PoseFrames
     ArrayList<PoseFrame> poseFrames;
+    int currentPoseFrame = 0;
     
     boolean moveLeft, moveRight, moveUp, moveDown, rotateLeft, rotateRight, mouseSelect;
     
@@ -160,6 +86,13 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
     private Vector3f lookAtDirection = new Vector3f(0,-0.8f,-0.2f);
     private float camDistance = 10;
     //private Camera cam = app.getCamera();
+    
+    // Current axis
+    int currentAxis = 1;
+    
+    // Axis increments
+    float[] axisIncrements = {0.1f,0.5f,1,5,10,15};
+    int currentAxisIncrement = 2;
     
     // Reference to humanoid ragdoll
     Humaniod human;
@@ -190,59 +123,27 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         AnimationEditor_Dev app = new AnimationEditor_Dev();
         app.start();
     }
+    
+    
 
-    @Override public void simpleInitApp(){
+    @Override 
+    public void simpleInitApp(){
         // Set the camera's angle and location
         //cam.lookAtDirection(camLocation, camLocation);
         //camLocation.set(cam.getDirection().mult(-camDistance));
         
         // Create human
-        human = new Humaniod();
-        human.initPrototype();
-        
-        // Create geometry to add human mesh to scene
-        Geometry geom = new Geometry("Custom Mesh", human.mesh);
-        human.model = new Node("Human");
-        
-        // Create material for the human
-        Material mat = assetManager.loadMaterial("Materials/VertexColorMat.j3m");
-        //mat.getAdditionalRenderState().setWireframe(true);
-        geom.setMaterial(mat);
-        human.model.attachChild(geom);
-        
-        selectionMatSelected = assetManager.loadMaterial("Materials/DevMaterial_LightGrey.j3m");
-        selectionMatDeselected = assetManager.loadMaterial("Materials/DevMaterial_DarkGrey.j3m");
+        createHuman();
         
         // Create skeleton control
-        SkeletonControl skeletonControl = new SkeletonControl(human.skeleton);
-        skeletonControl.setEnabled(true);
-        
-        // Attach skeleton control 
-        human.model.addControl(skeletonControl);
-        rootNode.attachChild(human.model);
+        createAnimationSkeleton();
         
         // Setup flycam
-        flyCam.setMoveSpeed(25);
-        flyCam.setDragToRotate(true);
-        inputManager.setCursorVisible(true);
-        //flyCam.setEnabled(false);
+        setupCamera();
         
-        // Debug skeleton setup
-        SkeletonDebugger skeletonDebug = new SkeletonDebugger("skeleton", skeletonControl.getSkeleton());
-        Material mat2 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        mat2.setColor("Color", ColorRGBA.White);
-        mat2.getAdditionalRenderState().setDepthTest(false);
-        skeletonDebug.setMaterial(mat2);
-        skeletonDebug.getWires().setLineWidth(5);
-        human.model.attachChild(skeletonDebug);
-        
-        // Debugging animation system
+        // Setup animation system
         human.model.addControl(new AnimControl(human.skeleton));
         control = human.model.getControl(AnimControl.class);
-        Skeleton skeleton = control.getSkeleton();
-        int boneCount = skeleton.getBoneCount();
-        
-        // TODO: Create ragdoll bone handles
         
         // Test animation creation cycle
         // TODO: Create the means to build animation data from pose data
@@ -293,6 +194,9 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
     private void createSelectionSkeleton(){
         SkeletonControl control = human.model.getControl(SkeletonControl.class);
         int boneCount = human.skeleton.getBoneCount();
+        
+        selectionMatSelected = assetManager.loadMaterial("Materials/DevMaterial_LightGrey.j3m");
+        selectionMatDeselected = assetManager.loadMaterial("Materials/DevMaterial_DarkGrey.j3m");
         
         // Create the bone arrays
         selectionBoneNodes = new Node[boneCount];
@@ -385,6 +289,48 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         
         return -1;
     }
+    
+    public void createHuman(){
+        // Create human
+        human = new Humaniod();
+        human.initPrototype();
+        
+        // Create geometry to add human mesh to scene
+        Geometry geom = new Geometry("Custom Mesh", human.mesh);
+        human.model = new Node("Human");
+        
+        // Create material for the human
+        Material mat = assetManager.loadMaterial("Materials/VertexColorMat.j3m");
+        //mat.getAdditionalRenderState().setWireframe(true);
+        geom.setMaterial(mat);
+        human.model.attachChild(geom);
+    }
+    
+    public void createAnimationSkeleton(){
+        SkeletonControl skeletonControl = new SkeletonControl(human.skeleton);
+        skeletonControl.setEnabled(true);
+        
+        // Attach skeleton control 
+        human.model.addControl(skeletonControl);
+        rootNode.attachChild(human.model);
+        
+        // Debug skeleton setup
+        SkeletonDebugger skeletonDebug = new SkeletonDebugger("skeleton", skeletonControl.getSkeleton());
+        Material mat2 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        mat2.setColor("Color", ColorRGBA.White);
+        mat2.getAdditionalRenderState().setDepthTest(false);
+        skeletonDebug.setMaterial(mat2);
+        skeletonDebug.getWires().setLineWidth(5);
+        human.model.attachChild(skeletonDebug);
+    }
+    
+    public void setupCamera(){
+        flyCam.setMoveSpeed(25);
+        flyCam.setDragToRotate(true);
+        inputManager.setCursorVisible(true);
+        //flyCam.setEnabled(false);
+    }
+    
     // Setup inputs
     // TODO: Need mappings for rotateUp and rotateDown
     // TODO: Need triggers for rotation
@@ -396,9 +342,39 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         inputManager.addMapping(InputMapping.RotateLeft.name(), new KeyTrigger(KeyInput.KEY_DOWN));
         inputManager.addMapping(InputMapping.RotateRight.name(), new KeyTrigger(KeyInput.KEY_DOWN)); */
         
+        inputManager.addMapping(InputMapping.RotateBonePos.name(), new KeyTrigger(KeyInput.KEY_PERIOD));
+        inputManager.addMapping(InputMapping.RotateBoneNeg.name(), new KeyTrigger(KeyInput.KEY_COMMA));
+        inputManager.addMapping(InputMapping.SelectAxisX.name(), new KeyTrigger(KeyInput.KEY_J));
+        inputManager.addMapping(InputMapping.SelectAxisY.name(), new KeyTrigger(KeyInput.KEY_K));
+        inputManager.addMapping(InputMapping.SelectAxisZ.name(), new KeyTrigger(KeyInput.KEY_L));
+        
+        inputManager.addMapping(InputMapping.CreatePoseFrame.name(), new KeyTrigger(KeyInput.KEY_DOWN));
+        inputManager.addMapping(InputMapping.EditPoseFrame.name(), new KeyTrigger(KeyInput.KEY_UP));
+        inputManager.addMapping(InputMapping.DeletePoseFrame.name(), new KeyTrigger(KeyInput.KEY_LEFT));
+        
+        inputManager.addMapping(InputMapping.RotateValueIncr.name(), new KeyTrigger(KeyInput.KEY_U));
+        inputManager.addMapping(InputMapping.RotateValueDecr.name(), new KeyTrigger(KeyInput.KEY_I));
+        
+        inputManager.addMapping(InputMapping.NextPoseFrame.name(), new KeyTrigger(KeyInput.KEY_O));
+        inputManager.addMapping(InputMapping.PrevPoseFrame.name(), new KeyTrigger(KeyInput.KEY_P));
+        
+        
         inputManager.addMapping(InputMapping.MouseSelect.name(), new MouseButtonTrigger(MouseInput.BUTTON_RIGHT));
         
-        inputManager.addListener(this, InputMapping.MouseSelect.name());
+        inputManager.addListener(this, InputMapping.RotateBonePos.name(),
+                                       InputMapping.RotateBoneNeg.name(),
+                                       InputMapping.SelectAxisX.name(),
+                                       InputMapping.SelectAxisY.name(),
+                                       InputMapping.SelectAxisZ.name(),
+                                       InputMapping.CreatePoseFrame.name(),
+                                       InputMapping.EditPoseFrame.name(),
+                                       InputMapping.DeletePoseFrame.name(),
+                                       InputMapping.RotateValueIncr.name(),
+                                       InputMapping.RotateValueDecr.name(),
+                                       InputMapping.NextPoseFrame.name(),
+                                       InputMapping.PrevPoseFrame.name(),
+                                       InputMapping.MouseSelect.name()
+        );
     }
     
     // Input mappings send events here
@@ -406,17 +382,29 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
     public void onAction(String name, boolean isPressed, float tpf){
         InputMapping input = InputMapping.valueOf(name);
         switch(input){
-            case MoveDown:
+            case RotateBonePos:
                 break;
-            case MoveUp:
+            case RotateBoneNeg:
                 break;
-            case MoveLeft:
+            case SelectAxisX:
                 break;
-            case MoveRight:
+            case SelectAxisY:
                 break;
-            case RotateLeft:
+            case SelectAxisZ:
                 break;
-            case RotateRight:
+            case CreatePoseFrame:
+                break;
+            case EditPoseFrame:
+                break;
+            case DeletePoseFrame:
+                break;
+            case RotateValueIncr:
+                break;
+            case RotateValueDecr:
+                break;
+            case NextPoseFrame:
+                break;
+            case PrevPoseFrame:
                 break;
             case MouseSelect:
                 // Perform ray-cast testing for bone-joint intersection
