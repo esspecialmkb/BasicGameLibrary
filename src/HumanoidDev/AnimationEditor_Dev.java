@@ -23,6 +23,7 @@ import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Ray;
 import com.jme3.math.Vector2f;
@@ -73,7 +74,11 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         
         // Navigate the pose frames
         NextPoseFrame,
-        PrevPoseFrame
+        PrevPoseFrame,
+        
+        // Manipulate the frame's time value
+        FrameTimePos,
+        FrameTimeNeg
     }
     
     // We need a mutable list of PoseFrames
@@ -81,7 +86,8 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
     int currentPoseFrame = 0;
     
     boolean moveLeft, moveRight, moveUp, moveDown, rotateLeft, rotateRight, mouseSelect;
-    
+    boolean rotateBonePos, rotateBoneNeg, selectAxisX, selectAxisY, selectAxisZ;
+    boolean rotateValueIncr, rotateValueDecr, nextPoseFrame, prevPoseFrame;
     private Vector3f camLocation = new Vector3f(0,20,0);
     private Vector3f lookAtDirection = new Vector3f(0,-0.8f,-0.2f);
     private float camDistance = 10;
@@ -124,7 +130,6 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         app.start();
     }
     
-    
 
     @Override 
     public void simpleInitApp(){
@@ -162,14 +167,17 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         addInputMappings();
         createSelectionSkeleton();
         
+        // Create the pose frame array
+        createPoseFrameTimeline();
     }
     
     @Override
     public void simpleUpdate(float tpf){
+        
         // Check for mouse select
         if(mouseSelect){
             // Collision test for bone-joints
-            int bSelect = updateSelectionSkeleton();
+            int bSelect = collideTestSelectionSkeleton();
             
             // Update currentBoneSelected flag
             if(bSelect != currentBoneSelection){
@@ -189,6 +197,60 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
             
             mouseSelect = false;
         }
+        
+        // Check bone rotation commands
+        if(rotateBonePos){
+            rotateBoneSelection(axisIncrements[currentAxisIncrement]*FastMath.DEG_TO_RAD);
+            rotateBonePos = false;
+        }if(rotateBoneNeg){
+            rotateBoneSelection(-axisIncrements[currentAxisIncrement]*FastMath.DEG_TO_RAD);
+            rotateBoneNeg = false;
+        }
+        
+        // Manipulate the increment value
+        if(rotateValueIncr){
+            currentAxisIncrement++;
+            if(currentAxisIncrement > (axisIncrements.length-1)){
+                currentAxisIncrement = axisIncrements.length-1;
+            }
+            rotateValueIncr = false;
+        }if(rotateValueDecr){
+            currentAxisIncrement--;
+            if(currentAxisIncrement < 0){
+                currentAxisIncrement = 0;
+            }
+            rotateValueDecr = false;
+        }
+        
+        // Check axis-select commands
+        if(selectAxisX){
+            currentAxis = 2;
+            selectAxisX = false;
+        }if(selectAxisY){
+            currentAxis = 0;
+            selectAxisY = false;
+        }if(selectAxisZ){
+            currentAxis = 1;
+            selectAxisZ = false;
+        }
+    }
+    
+    private void rotateBoneSelection(float value){
+        // Get the bone from the skeleton
+        Bone bone = human.skeleton.getBone(currentBoneSelection);
+        // Grab rotation and local position
+        Vector3f localPosition = bone.getLocalPosition();
+        Quaternion localRotation = bone.getLocalRotation();
+        
+        float[] angles = {0,0,0};
+        // Convert the quaternion into array (yaw,roll,pitch)
+        angles = localRotation.toAngles(angles);
+        
+        angles[currentAxis] += axisIncrements[currentAxisIncrement];
+        
+        localRotation.fromAngles(angles);
+        
+        bone.setLocalRotation(localRotation);
     }
     
     private void createSelectionSkeleton(){
@@ -227,7 +289,8 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         }
     }
     
-    private int updateSelectionSkeleton(){
+    // Collision test for selection skeleton
+    private int collideTestSelectionSkeleton(){
         int boneSelectionResult = -1;
         // Reset results list.
         CollisionResults results = new CollisionResults();
@@ -243,11 +306,8 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         // (assuming crosshairs in center of screen).
         Ray camRay = new Ray(cam.getLocation(), cam.getDirection());
         
-        
+        // Test collision with all bones
         for(int b = 0; b < human.skeleton.getBoneCount(); b++){
-            //selectionBones[b] = human.skeleton.getBone(b);
-            //selectionGeometries[b] = new Geometry("A shape", selectionMesh); // wrap shape into geometry
-            
             // Collect intersections between ray and all boneSelectionNodes in results list.
             selectionGeometries[b].collideWith(mouseRay, results);
             
@@ -288,6 +348,21 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         }
         
         return -1;
+    }
+    
+    // Create a UI element for the timeline - in dev
+    private void createPoseFrameTimeline(){
+        poseFrames = new ArrayList();
+        currentPoseFrame = 0;
+    }
+    
+    private void createNewPoseFrame(){
+        PoseFrame newFrame = new PoseFrame();
+        
+        newFrame.getBoneData(human);
+        poseFrames.add(newFrame);
+        
+        currentPoseFrame++;
     }
     
     public void createHuman(){
@@ -358,6 +433,9 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         inputManager.addMapping(InputMapping.NextPoseFrame.name(), new KeyTrigger(KeyInput.KEY_O));
         inputManager.addMapping(InputMapping.PrevPoseFrame.name(), new KeyTrigger(KeyInput.KEY_P));
         
+        inputManager.addMapping(InputMapping.FrameTimePos.name(), new KeyTrigger(KeyInput.KEY_N));
+        inputManager.addMapping(InputMapping.FrameTimeNeg.name(), new KeyTrigger(KeyInput.KEY_M));
+        
         
         inputManager.addMapping(InputMapping.MouseSelect.name(), new MouseButtonTrigger(MouseInput.BUTTON_RIGHT));
         
@@ -373,7 +451,9 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
                                        InputMapping.RotateValueDecr.name(),
                                        InputMapping.NextPoseFrame.name(),
                                        InputMapping.PrevPoseFrame.name(),
-                                       InputMapping.MouseSelect.name()
+                                       InputMapping.MouseSelect.name(),
+                                       InputMapping.FrameTimePos.name(),
+                                       InputMapping.FrameTimeNeg.name()
         );
     }
     
@@ -382,30 +462,61 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
     public void onAction(String name, boolean isPressed, float tpf){
         InputMapping input = InputMapping.valueOf(name);
         switch(input){
+            // Bone Rotation
             case RotateBonePos:
+                rotateBonePos = isPressed;
                 break;
             case RotateBoneNeg:
+                rotateBoneNeg = isPressed; 
                 break;
+                
+            // Axis Selection
             case SelectAxisX:
+                selectAxisX = isPressed; 
+                
                 break;
             case SelectAxisY:
+                selectAxisY = isPressed; 
+                
                 break;
             case SelectAxisZ:
+                selectAxisZ = isPressed;;
                 break;
+                
+            // Pose Frame Lifecycle
             case CreatePoseFrame:
+                if(isPressed == false){
+                    createNewPoseFrame();
+                }
                 break;
             case EditPoseFrame:
                 break;
             case DeletePoseFrame:
                 break;
+                
+            // Rotation value manipulation
             case RotateValueIncr:
+                rotateValueIncr = isPressed;
                 break;
             case RotateValueDecr:
+                rotateValueDecr = isPressed;
                 break;
+                
+            // Poseframe Navigation
             case NextPoseFrame:
+                nextPoseFrame = isPressed;
                 break;
             case PrevPoseFrame:
+                prevPoseFrame = isPressed;
                 break;
+                
+            // Frametime editing
+            case FrameTimePos:
+                break;
+            case FrameTimeNeg:
+                break;
+                
+            // Bone selection
             case MouseSelect:
                 // Perform ray-cast testing for bone-joint intersection
                 mouseSelect = isPressed;
