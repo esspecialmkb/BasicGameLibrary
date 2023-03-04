@@ -23,7 +23,7 @@ import java.nio.FloatBuffer;
  * @author TigerSage
  */
 public class Humaniod{
-    boolean userControl = false;
+    boolean userControl = true;
     // Mesh element to hold static mesh data
     MeshElement protoMesh;
     
@@ -1665,11 +1665,36 @@ public class Humaniod{
         mesh.setDynamic();
 
         initAnimData();
-
-
-
-
     }
+    
+    public void setUserBoneControl(boolean control){
+        rootBone.setUserControl(control);
+    
+        // Body
+        waistBone.setUserControl(control);
+        torsoBone.setUserControl(control);
+        chestBone.setUserControl(control);
 
+        // Left Leg
+        lHipBone.setUserControl(control);
+        lKneeBone.setUserControl(control);
+        lAnkleBone.setUserControl(control);
 
+        // Right Leg
+        rHipBone.setUserControl(control);
+        rKneeBone.setUserControl(control);
+        rAnkleBone.setUserControl(control);
+
+        // Left Arm
+        lShoulderBone.setUserControl(control);
+        lElbowBone.setUserControl(control);
+        lWristBone.setUserControl(control);
+
+        // Right Arm
+        rShoulderBone.setUserControl(control);
+        rElbowBone.setUserControl(control);
+        rWristBone.setUserControl(control);
+
+        headBone.setUserControl(control);
+    }
 }
