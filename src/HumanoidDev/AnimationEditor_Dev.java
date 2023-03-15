@@ -15,6 +15,7 @@ import com.jme3.animation.Skeleton;
 import com.jme3.animation.SkeletonControl;
 import com.jme3.app.SimpleApplication;
 import com.jme3.collision.CollisionResults;
+import com.jme3.font.BitmapText;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
@@ -82,8 +83,15 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
     }
     
     // We need a mutable list of PoseFrames
+    // TODO: ADD A REFERENCE POSEFRAME FOR THE CURRENT FRAME
     ArrayList<PoseFrame> poseFrames;
     int currentPoseFrame = 0;
+    
+    // HUD
+    BitmapText boneText;
+    BitmapText axisText;
+    BitmapText valueText;
+    BitmapText rotationText;
     
     boolean moveLeft, moveRight, moveUp, moveDown, rotateLeft, rotateRight, mouseSelect;
     boolean rotateBonePos, rotateBoneNeg, selectAxisX, selectAxisY, selectAxisZ;
@@ -101,6 +109,7 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
     int currentAxisIncrement = 2;
     
     // Reference to humanoid ragdoll
+    // TODO: USE THIS OBJECT FOR BONE REFERENCING
     Humaniod human;
     
     // Animation Controller
@@ -169,6 +178,36 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         
         // Create the pose frame array
         createPoseFrameTimeline();
+        
+        // Create a primitive HUD
+        // First line for the axis selection
+        boneText = new BitmapText(guiFont, false);
+        boneText.setSize(guiFont.getCharSet().getRenderedSize());      // font size
+        boneText.setColor(ColorRGBA.White);                             // font color
+        boneText.setText("Current bone selection:");             // the text
+        boneText.setLocalTranslation(0, settings.getHeight()/* - hudText.getLineHeight()*/, 0); // position
+        guiNode.attachChild(boneText);
+        
+        axisText = new BitmapText(guiFont, false);
+        axisText.setSize(guiFont.getCharSet().getRenderedSize());      // font size
+        axisText.setColor(ColorRGBA.White);                             // font color
+        axisText.setText("Current axis selection:");             // the text
+        axisText.setLocalTranslation(0, settings.getHeight()- axisText.getLineHeight(), 0); // position
+        guiNode.attachChild(axisText);
+        
+        valueText = new BitmapText(guiFont, false);
+        valueText.setSize(guiFont.getCharSet().getRenderedSize());      // font size
+        valueText.setColor(ColorRGBA.White);                             // font color
+        valueText.setText("Current Increment Value: " + axisIncrements[currentAxisIncrement]);             // the text
+        valueText.setLocalTranslation(0, settings.getHeight()- (valueText.getLineHeight()*2), 0); // position
+        guiNode.attachChild(valueText);
+        
+        rotationText = new BitmapText(guiFont, false);
+        rotationText.setSize(guiFont.getCharSet().getRenderedSize());      // font size
+        rotationText.setColor(ColorRGBA.White);                             // font color
+        rotationText.setText("Current Rotation Value: " + axisIncrements[currentAxisIncrement]);             // the text
+        rotationText.setLocalTranslation(0, settings.getHeight()- (rotationText.getLineHeight()*3), 0); // position
+        guiNode.attachChild(rotationText);
     }
     
     @Override
@@ -188,11 +227,14 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
                     // Change the material of the selected bone
                     System.out.println("NEW BONE :" + selectionBones[currentBoneSelection].getName());
                     selectionGeometries[currentBoneSelection].setMaterial(selectionMatSelected);
+                    boneText.setText("Current bone selection: " + selectionBones[currentBoneSelection].getName().toUpperCase()); 
                 }
                 if(lastBoneSelected != -1){
                     // Set the material of the last selected bone back to normal
                     selectionGeometries[lastBoneSelected].setMaterial(selectionMatDeselected);
                 }
+            }if(bSelect == -1){
+                boneText.setText("Current bone selection: NULL"); 
             }
             
             mouseSelect = false;
@@ -203,7 +245,7 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
             rotateBoneSelection(axisIncrements[currentAxisIncrement]*FastMath.DEG_TO_RAD);
             rotateBonePos = false;
         }if(rotateBoneNeg){
-            rotateBoneSelection(-axisIncrements[currentAxisIncrement]*FastMath.DEG_TO_RAD);
+            rotateBoneSelection(-1*axisIncrements[currentAxisIncrement]*FastMath.DEG_TO_RAD);
             rotateBoneNeg = false;
         }
         
@@ -213,26 +255,33 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
             if(currentAxisIncrement > (axisIncrements.length-1)){
                 currentAxisIncrement = axisIncrements.length-1;
             }
+            valueText.setText("Current Increment Value: " + axisIncrements[currentAxisIncrement]);             // the text
             rotateValueIncr = false;
         }if(rotateValueDecr){
             currentAxisIncrement--;
             if(currentAxisIncrement < 0){
                 currentAxisIncrement = 0;
             }
+            valueText.setText("Current Increment Value: " + axisIncrements[currentAxisIncrement]);             // the text
             rotateValueDecr = false;
         }
         
         // Check axis-select commands
         if(selectAxisX){
             currentAxis = 2;
+            axisText.setText("Current axis selection: X"); 
             selectAxisX = false;
         }if(selectAxisY){
             currentAxis = 0;
+            axisText.setText("Current axis selection: Y"); 
             selectAxisY = false;
         }if(selectAxisZ){
             currentAxis = 1;
+            axisText.setText("Current axis selection: Z"); 
             selectAxisZ = false;
         }
+        
+        rotationText.setText("Current Rotation Value: " + axisIncrements[currentAxisIncrement]);
     }
     
     private void rotateBoneSelection(float value){
@@ -246,11 +295,28 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         // Convert the quaternion into array (yaw,roll,pitch)
         angles = localRotation.toAngles(angles);
         
-        angles[currentAxis] += axisIncrements[currentAxisIncrement];
+        angles[currentAxis] += value;
         
         localRotation.fromAngles(angles);
         
         bone.setLocalRotation(localRotation);
+    }
+    
+    private Quaternion getBoneSelectionRotation(){
+        // Get the bone from the skeleton
+        Bone bone = human.skeleton.getBone(currentBoneSelection);
+        // Grab rotation and local position
+        
+        return bone.getLocalRotation();
+    }
+    
+    private Vector3f getBoneSelectionPosition(){
+        // Get the bone from the skeleton
+        Bone bone = human.skeleton.getBone(currentBoneSelection);
+        // Grab rotation and local position
+        
+        
+        return bone.getLocalPosition();
     }
     
     private void createSelectionSkeleton(){
