@@ -6,6 +6,8 @@
 package HumanoidDev;
 
 import HumanoidAnimation.HumanoidRunAnimationData;
+import static Utility.StringCharConst.textRed;
+import static Utility.StringCharConst.textReset;
 import com.jme3.animation.AnimChannel;
 import com.jme3.animation.AnimControl;
 import com.jme3.animation.AnimEventListener;
@@ -16,12 +18,20 @@ import com.jme3.animation.SkeletonControl;
 import com.jme3.app.SimpleApplication;
 import com.jme3.collision.CollisionResults;
 import com.jme3.font.BitmapText;
+import com.jme3.input.JoystickButton;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
+import com.jme3.input.RawInputListener;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
+import com.jme3.input.event.JoyAxisEvent;
+import com.jme3.input.event.JoyButtonEvent;
+import com.jme3.input.event.KeyInputEvent;
+import com.jme3.input.event.MouseButtonEvent;
+import com.jme3.input.event.MouseMotionEvent;
+import com.jme3.input.event.TouchEvent;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
@@ -33,6 +43,8 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.debug.SkeletonDebugger;
 import com.jme3.scene.shape.Sphere;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 
 /**
@@ -179,6 +191,9 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         // Create the pose frame array
         createPoseFrameTimeline();
         
+        //
+        getBoneData();
+        
         // Create a primitive HUD
         // First line for the axis selection
         boneText = new BitmapText(guiFont, false);
@@ -212,6 +227,7 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
     
     @Override
     public void simpleUpdate(float tpf){
+        boolean rotationTextUpdateFlag = false;
         
         // Check for mouse select
         if(mouseSelect){
@@ -227,6 +243,7 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
                     // Change the material of the selected bone
                     System.out.println("NEW BONE :" + selectionBones[currentBoneSelection].getName());
                     selectionGeometries[currentBoneSelection].setMaterial(selectionMatSelected);
+                    rotationTextUpdateFlag = true;
                     boneText.setText("Current bone selection: " + selectionBones[currentBoneSelection].getName().toUpperCase()); 
                 }
                 if(lastBoneSelected != -1){
@@ -234,6 +251,7 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
                     selectionGeometries[lastBoneSelected].setMaterial(selectionMatDeselected);
                 }
             }if(bSelect == -1){
+                rotationTextUpdateFlag = true;
                 boneText.setText("Current bone selection: NULL"); 
             }
             
@@ -242,10 +260,16 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         
         // Check bone rotation commands
         if(rotateBonePos){
+            //parseRotateBoneSelection(axisIncrements[currentAxisIncrement]);
+            
             rotateBoneSelection(axisIncrements[currentAxisIncrement]*FastMath.DEG_TO_RAD);
+            rotationTextUpdateFlag = true;
             rotateBonePos = false;
         }if(rotateBoneNeg){
+            //parseRotateBoneSelection(-1*axisIncrements[currentAxisIncrement]);
+            
             rotateBoneSelection(-1*axisIncrements[currentAxisIncrement]*FastMath.DEG_TO_RAD);
+            rotationTextUpdateFlag = true;
             rotateBoneNeg = false;
         }
         
@@ -270,18 +294,29 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         if(selectAxisX){
             currentAxis = 2;
             axisText.setText("Current axis selection: X"); 
+            rotationTextUpdateFlag = true;
             selectAxisX = false;
         }if(selectAxisY){
             currentAxis = 0;
             axisText.setText("Current axis selection: Y"); 
+            rotationTextUpdateFlag = true;
             selectAxisY = false;
         }if(selectAxisZ){
             currentAxis = 1;
             axisText.setText("Current axis selection: Z"); 
+            rotationTextUpdateFlag = true;
             selectAxisZ = false;
         }
+        if(rotationTextUpdateFlag){
+            Quaternion boneSelectionRotation = getBoneSelectionRotation();
+            float[] angles = {0,0,0};
+            angles = boneSelectionRotation.toAngles(angles);
+            angles[0] = ((float)Math.round(angles[0]*FastMath.RAD_TO_DEG * 100))/100;
+            angles[1] = ((float)Math.round(angles[1]*FastMath.RAD_TO_DEG * 100))/100;
+            angles[2] = ((float)Math.round(angles[2]*FastMath.RAD_TO_DEG * 100))/100;
+            rotationText.setText("Current Rotation Value: X_" + angles[2] + ", Y_" + angles[0] + ", Z_" + angles[1]);
+        }
         
-        rotationText.setText("Current Rotation Value: " + axisIncrements[currentAxisIncrement]);
     }
     
     private void rotateBoneSelection(float value){
@@ -302,6 +337,195 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         bone.setLocalRotation(localRotation);
     }
     
+    // Grab the rotation data from all bones and store it in arrays
+    private void getBoneData(){
+        for(int b = 0; b > 17; b++){
+            // Get the bone from the skeleton
+            Bone bone = human.skeleton.getBone(b);
+            // Grab rotation and local position
+            Vector3f localPosition = bone.getLocalPosition();
+            Quaternion localRotation = bone.getLocalRotation();
+            
+            float[] angles = {0,0,0};
+            // Convert the quaternion into array (yaw,roll,pitch)
+            angles = localRotation.toAngles(angles);
+            parseBoneRotation(b,convertRadToDeg(angles));
+        }
+    }
+    
+    // Convert float array from radians to degrees
+    private float[] convertRadToDeg(float[] angles){
+        angles[0] = angles[0] * FastMath.RAD_TO_DEG;
+        angles[1] = angles[1] * FastMath.RAD_TO_DEG;
+        angles[2] = angles[2] * FastMath.RAD_TO_DEG;
+        return angles;
+    }
+    
+    // Convert float array from degrees to radians
+    private float[] convertDegToRad(float[] angles){
+        angles[0] = angles[0] * FastMath.DEG_TO_RAD;
+        angles[1] = angles[1] * FastMath.DEG_TO_RAD;
+        angles[2] = angles[2] * FastMath.DEG_TO_RAD;
+        return angles;
+    }
+    
+    private void parseBoneRotation(int bone, float[] value){
+        switch(bone){
+            case 0:
+                rootRot= value;
+                break;
+            case 1:
+                lHipRot= value;
+                break;
+            case 2:
+                lKneeRot= value;
+                break;
+            case 3:
+                lAnkleRot= value;
+                break;
+            case 4:
+                rHipRot= value;
+                break;
+            case 5:
+                rKneeRot= value;
+                break;
+            case 6:
+                rAnkleRot= value;
+                break;
+            case 7:
+                waistRot= value;
+                break;
+            case 8:
+                torsoRot= value;
+                break;
+            case 9:
+                chestRot= value;
+                break;
+            case 10:
+                lShoulderRot= value;
+                break;
+            case 11:
+                lElbowRot= value;
+                break;
+            case 12:
+                lWristRot= value;
+                break;
+            case 13:
+                rShoulderRot= value;
+                break;
+            case 14:
+                rElbowRot= value;
+                break;
+            case 15:
+                rWristRot= value;
+                break;
+            case 16:
+                headRot= value;
+                break;
+        }
+    }
+    
+    // Using arrays to update bone rotation
+    float[] tempAngles = {0,0,0};
+    private void parseRotateBoneSelection(float value){
+        
+        switch(currentBoneSelection){
+            case 0:
+                rootRot[currentAxis] += value;
+                tempAngles = rootRot;
+                break;
+            case 1:
+                lHipRot[currentAxis] += value;
+                tempAngles = lHipRot;
+                break;
+            case 2:
+                lKneeRot[currentAxis] += value;
+                tempAngles = lKneeRot;
+                break;
+            case 3:
+                lAnkleRot[currentAxis] += value;
+                tempAngles = lAnkleRot;
+                break;
+            case 4:
+                rHipRot[currentAxis] += value;
+                tempAngles = rHipRot;
+                break;
+            case 5:
+                rKneeRot[currentAxis] += value;
+                tempAngles = rKneeRot;
+                break;
+            case 6:
+                rAnkleRot[currentAxis] += value;
+                tempAngles = rAnkleRot;
+                break;
+            case 7:
+                waistRot[currentAxis] += value;
+                tempAngles = waistRot;
+                break;
+            case 8:
+                torsoRot[currentAxis] += value;
+                tempAngles = torsoRot;
+                break;
+            case 9:
+                chestRot[currentAxis] += value;
+                tempAngles = chestRot;
+                break;
+            case 10:
+                lShoulderRot[currentAxis] += value;
+                tempAngles = lShoulderRot;
+                break;
+            case 11:
+                lElbowRot[currentAxis] += value;
+                tempAngles = lElbowRot;
+                break;
+            case 12:
+                lWristRot[currentAxis] += value;
+                tempAngles = lWristRot;
+                break;
+            case 13:
+                rShoulderRot[currentAxis] += value;
+                tempAngles = rShoulderRot;
+                break;
+            case 14:
+                rElbowRot[currentAxis] += value;
+                tempAngles = rElbowRot;
+                break;
+            case 15:
+                rWristRot[currentAxis] += value;
+                tempAngles = rWristRot;
+                break;
+            case 16:
+                headRot[currentAxis] += value;
+                tempAngles = headRot;
+                break;
+            
+        }
+        // Get the bone from the skeleton
+        Bone bone = human.skeleton.getBone(currentBoneSelection);
+        Quaternion localRotation = new Quaternion().fromAngles(convertDegToRad(tempAngles));
+        
+        bone.setLocalRotation(localRotation);
+        
+    }
+    
+    float[] rootRot = {0,0,0};
+    float[] lHipRot = {0,0,0};
+    float[] rHipRot = {0,0,0};
+    float[] lKneeRot = {0,0,0};
+    float[] rKneeRot = {0,0,0};
+    float[] lAnkleRot = {0,0,0};
+    float[] rAnkleRot = {0,0,0};
+    float[] waistRot = {0,0,0};
+    float[] torsoRot = {0,0,0};
+    float[] chestRot = {0,0,0};
+    float[] lShoulderRot = {0,0,0};
+    float[] rShoulderRot = {0,0,0};
+    float[] lElbowRot = {0,0,0};
+    float[] rElbowRot = {0,0,0};
+    float[] lWristRot = {0,0,0};
+    float[] rWristRot = {0,0,0};
+    float[] headRot = {0,0,0};
+    
     private Quaternion getBoneSelectionRotation(){
         // Get the bone from the skeleton
         Bone bone = human.skeleton.getBone(currentBoneSelection);
@@ -317,6 +541,15 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         
         
         return bone.getLocalPosition();
+    }
+    
+    // Helper function to round floating values
+    private static float round(float value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+
+        BigDecimal bd = new BigDecimal(Double.toString(value));
+        bd = bd.setScale(places, RoundingMode.HALF_UP);
+        return bd.floatValue();
     }
     
     private void createSelectionSkeleton(){
@@ -606,4 +839,53 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
+    public class KeyboardController implements RawInputListener{
+
+        @Override
+        public void beginInput() {
+            //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public void endInput() {
+            //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public void onJoyAxisEvent(JoyAxisEvent evt) {
+            //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public void onJoyButtonEvent(JoyButtonEvent evt) {
+            //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public void onMouseMotionEvent(MouseMotionEvent evt) {
+            //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public void onMouseButtonEvent(MouseButtonEvent evt) {
+            //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public void onKeyEvent(KeyInputEvent evt) {
+            // Grab keyboard presses here
+            System.out.println(textRed+"Key Input Event"+textReset);
+
+            int keyCode = evt.getKeyCode();
+            boolean pressed = evt.isPressed();
+            boolean released = evt.isReleased();
+            boolean repeating = evt.isRepeating();
+        }
+
+        @Override
+        public void onTouchEvent(TouchEvent evt) {
+            //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+        
+    }
 }
