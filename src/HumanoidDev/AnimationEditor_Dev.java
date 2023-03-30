@@ -43,9 +43,22 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.debug.SkeletonDebugger;
 import com.jme3.scene.shape.Sphere;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -91,7 +104,10 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         
         // Manipulate the frame's time value
         FrameTimePos,
-        FrameTimeNeg
+        FrameTimeNeg,
+        
+        // Toggle typing keyboard mode
+        TypingKeyboardToggle
     }
     
     // We need a mutable list of PoseFrames
@@ -105,9 +121,13 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
     BitmapText valueText;
     BitmapText rotationText;
     
+    // Input latch toggles
     boolean moveLeft, moveRight, moveUp, moveDown, rotateLeft, rotateRight, mouseSelect;
     boolean rotateBonePos, rotateBoneNeg, selectAxisX, selectAxisY, selectAxisZ;
     boolean rotateValueIncr, rotateValueDecr, nextPoseFrame, prevPoseFrame;
+    boolean typingKeyboardToggle;
+    
+    // Cam position data
     private Vector3f camLocation = new Vector3f(0,20,0);
     private Vector3f lookAtDirection = new Vector3f(0,-0.8f,-0.2f);
     private float camDistance = 10;
@@ -194,6 +214,10 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         //
         getBoneData();
         
+        // Add a raw listener because it's eisier to get all joystick events
+        // this way.
+        inputManager.addRawInputListener( new KeyboardController() );
+        
         // Create a primitive HUD
         // First line for the axis selection
         boneText = new BitmapText(guiFont, false);
@@ -230,7 +254,7 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         boolean rotationTextUpdateFlag = false;
         
         // Check for mouse select
-        if(mouseSelect){
+        if(mouseSelect && !typingKeyboardToggle){
             // Collision test for bone-joints
             int bSelect = collideTestSelectionSkeleton();
             
@@ -259,13 +283,13 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         }
         
         // Check bone rotation commands
-        if(rotateBonePos){
+        if(rotateBonePos && !typingKeyboardToggle){
             //parseRotateBoneSelection(axisIncrements[currentAxisIncrement]);
             
             rotateBoneSelection(axisIncrements[currentAxisIncrement]*FastMath.DEG_TO_RAD);
             rotationTextUpdateFlag = true;
             rotateBonePos = false;
-        }if(rotateBoneNeg){
+        }if(rotateBoneNeg && !typingKeyboardToggle){
             //parseRotateBoneSelection(-1*axisIncrements[currentAxisIncrement]);
             
             rotateBoneSelection(-1*axisIncrements[currentAxisIncrement]*FastMath.DEG_TO_RAD);
@@ -274,14 +298,14 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         }
         
         // Manipulate the increment value
-        if(rotateValueIncr){
+        if(rotateValueIncr && !typingKeyboardToggle){
             currentAxisIncrement++;
             if(currentAxisIncrement > (axisIncrements.length-1)){
                 currentAxisIncrement = axisIncrements.length-1;
             }
             valueText.setText("Current Increment Value: " + axisIncrements[currentAxisIncrement]);             // the text
             rotateValueIncr = false;
-        }if(rotateValueDecr){
+        }if(rotateValueDecr && !typingKeyboardToggle){
             currentAxisIncrement--;
             if(currentAxisIncrement < 0){
                 currentAxisIncrement = 0;
@@ -291,21 +315,37 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         }
         
         // Check axis-select commands
-        if(selectAxisX){
+        if(selectAxisX && !typingKeyboardToggle){
             currentAxis = 2;
             axisText.setText("Current axis selection: X"); 
             rotationTextUpdateFlag = true;
             selectAxisX = false;
-        }if(selectAxisY){
+        }if(selectAxisY && !typingKeyboardToggle){
             currentAxis = 0;
             axisText.setText("Current axis selection: Y"); 
             rotationTextUpdateFlag = true;
             selectAxisY = false;
-        }if(selectAxisZ){
+        }if(selectAxisZ && !typingKeyboardToggle){
             currentAxis = 1;
             axisText.setText("Current axis selection: Z"); 
             rotationTextUpdateFlag = true;
             selectAxisZ = false;
+        }if(nextPoseFrame){
+            // Make sure we have a next frame...
+            int pFCount = poseFrames.size();
+            currentPoseFrame++;
+            if(currentPoseFrame > pFCount){
+                currentPoseFrame = pFCount;
+            }
+            nextPoseFrame = false;
+        }if(prevPoseFrame){
+            // Make sure we have a prev frame...
+            int pFCount = poseFrames.size();
+            currentPoseFrame--;
+            if(currentPoseFrame == 0){
+                currentPoseFrame = 1;
+            }
+            prevPoseFrame = false;
         }
         if(rotationTextUpdateFlag){
             Quaternion boneSelectionRotation = getBoneSelectionRotation();
@@ -317,6 +357,9 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
             rotationText.setText("Current Rotation Value: X_" + angles[2] + ", Y_" + angles[0] + ", Z_" + angles[1]);
         }
         
+        if(typingKeyboardToggle){
+            // Get info from typing keyboard to build a string
+        }
     }
     
     private void rotateBoneSelection(float value){
@@ -427,86 +470,6 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
     
     // Using arrays to update bone rotation
     float[] tempAngles = {0,0,0};
-    private void parseRotateBoneSelection(float value){
-        
-        switch(currentBoneSelection){
-            case 0:
-                rootRot[currentAxis] += value;
-                tempAngles = rootRot;
-                break;
-            case 1:
-                lHipRot[currentAxis] += value;
-                tempAngles = lHipRot;
-                break;
-            case 2:
-                lKneeRot[currentAxis] += value;
-                tempAngles = lKneeRot;
-                break;
-            case 3:
-                lAnkleRot[currentAxis] += value;
-                tempAngles = lAnkleRot;
-                break;
-            case 4:
-                rHipRot[currentAxis] += value;
-                tempAngles = rHipRot;
-                break;
-            case 5:
-                rKneeRot[currentAxis] += value;
-                tempAngles = rKneeRot;
-                break;
-            case 6:
-                rAnkleRot[currentAxis] += value;
-                tempAngles = rAnkleRot;
-                break;
-            case 7:
-                waistRot[currentAxis] += value;
-                tempAngles = waistRot;
-                break;
-            case 8:
-                torsoRot[currentAxis] += value;
-                tempAngles = torsoRot;
-                break;
-            case 9:
-                chestRot[currentAxis] += value;
-                tempAngles = chestRot;
-                break;
-            case 10:
-                lShoulderRot[currentAxis] += value;
-                tempAngles = lShoulderRot;
-                break;
-            case 11:
-                lElbowRot[currentAxis] += value;
-                tempAngles = lElbowRot;
-                break;
-            case 12:
-                lWristRot[currentAxis] += value;
-                tempAngles = lWristRot;
-                break;
-            case 13:
-                rShoulderRot[currentAxis] += value;
-                tempAngles = rShoulderRot;
-                break;
-            case 14:
-                rElbowRot[currentAxis] += value;
-                tempAngles = rElbowRot;
-                break;
-            case 15:
-                rWristRot[currentAxis] += value;
-                tempAngles = rWristRot;
-                break;
-            case 16:
-                headRot[currentAxis] += value;
-                tempAngles = headRot;
-                break;
-            
-        }
-        // Get the bone from the skeleton
-        Bone bone = human.skeleton.getBone(currentBoneSelection);
-        Quaternion localRotation = new Quaternion().fromAngles(convertDegToRad(tempAngles));
-        
-        bone.setLocalRotation(localRotation);
-        
-    }
     
     float[] rootRot = {0,0,0};
     float[] lHipRot = {0,0,0};
@@ -533,25 +496,7 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         
         return bone.getLocalRotation();
     }
-    
-    private Vector3f getBoneSelectionPosition(){
-        // Get the bone from the skeleton
-        Bone bone = human.skeleton.getBone(currentBoneSelection);
-        // Grab rotation and local position
-        
-        
-        return bone.getLocalPosition();
-    }
-    
-    // Helper function to round floating values
-    private static float round(float value, int places) {
-        if (places < 0) throw new IllegalArgumentException();
-
-        BigDecimal bd = new BigDecimal(Double.toString(value));
-        bd = bd.setScale(places, RoundingMode.HALF_UP);
-        return bd.floatValue();
-    }
-    
+            
     private void createSelectionSkeleton(){
         SkeletonControl control = human.model.getControl(SkeletonControl.class);
         int boneCount = human.skeleton.getBoneCount();
@@ -660,7 +605,6 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         
         newFrame.getBoneData(human);
         poseFrames.add(newFrame);
-        
         currentPoseFrame++;
     }
     
@@ -738,6 +682,8 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         
         inputManager.addMapping(InputMapping.MouseSelect.name(), new MouseButtonTrigger(MouseInput.BUTTON_RIGHT));
         
+        inputManager.addMapping(InputMapping.TypingKeyboardToggle.name(), new KeyTrigger(KeyInput.KEY_TAB));
+        
         inputManager.addListener(this, InputMapping.RotateBonePos.name(),
                                        InputMapping.RotateBoneNeg.name(),
                                        InputMapping.SelectAxisX.name(),
@@ -752,8 +698,28 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
                                        InputMapping.PrevPoseFrame.name(),
                                        InputMapping.MouseSelect.name(),
                                        InputMapping.FrameTimePos.name(),
-                                       InputMapping.FrameTimeNeg.name()
+                                       InputMapping.FrameTimeNeg.name(),
+                                       InputMapping.TypingKeyboardToggle.name()
         );
+    }
+    
+    protected void removeInputMappings(){
+        inputManager.deleteTrigger(InputMapping.RotateBonePos.name(), new KeyTrigger(KeyInput.KEY_PERIOD));
+        inputManager.deleteTrigger(InputMapping.RotateBoneNeg.name(), new KeyTrigger(KeyInput.KEY_COMMA));
+        inputManager.deleteTrigger(InputMapping.SelectAxisX.name(), new KeyTrigger(KeyInput.KEY_J));
+        inputManager.deleteTrigger(InputMapping.SelectAxisY.name(), new KeyTrigger(KeyInput.KEY_K));
+        inputManager.deleteTrigger(InputMapping.SelectAxisZ.name(), new KeyTrigger(KeyInput.KEY_L));
+        inputManager.deleteTrigger(InputMapping.CreatePoseFrame.name(), new KeyTrigger(KeyInput.KEY_DOWN));
+        inputManager.deleteTrigger(InputMapping.EditPoseFrame.name(), new KeyTrigger(KeyInput.KEY_UP));
+        inputManager.deleteTrigger(InputMapping.DeletePoseFrame.name(), new KeyTrigger(KeyInput.KEY_LEFT));
+        inputManager.deleteTrigger(InputMapping.RotateValueIncr.name(), new KeyTrigger(KeyInput.KEY_U));
+        inputManager.deleteTrigger(InputMapping.RotateValueDecr.name(), new KeyTrigger(KeyInput.KEY_I));
+        inputManager.deleteTrigger(InputMapping.NextPoseFrame.name(), new KeyTrigger(KeyInput.KEY_O));
+        inputManager.deleteTrigger(InputMapping.PrevPoseFrame.name(), new KeyTrigger(KeyInput.KEY_P));
+        inputManager.deleteTrigger(InputMapping.FrameTimePos.name(), new KeyTrigger(KeyInput.KEY_N));
+        inputManager.deleteTrigger(InputMapping.FrameTimeNeg.name(), new KeyTrigger(KeyInput.KEY_M));
+        inputManager.deleteTrigger(InputMapping.MouseSelect.name(), new MouseButtonTrigger(MouseInput.BUTTON_RIGHT));
+        //inputManager.deleteTrigger(InputMapping.TypingKeyboardToggle.name(), new KeyTrigger(KeyInput.KEY_PERIOD));
     }
     
     // Input mappings send events here
@@ -820,6 +786,13 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
                 // Perform ray-cast testing for bone-joint intersection
                 mouseSelect = isPressed;
                 break;
+                
+            case TypingKeyboardToggle:
+                if(isPressed){
+                    typingKeyboardToggle =! typingKeyboardToggle;
+                }
+                
+                break;
         }
     }
     
@@ -839,6 +812,7 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
+    // Raw input listener for typing keyboard
     public class KeyboardController implements RawInputListener{
 
         @Override
@@ -874,12 +848,14 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         @Override
         public void onKeyEvent(KeyInputEvent evt) {
             // Grab keyboard presses here
-            System.out.println(textRed+"Key Input Event"+textReset);
+            //System.out.println(textRed+"Key Input Event"+textReset);
 
             int keyCode = evt.getKeyCode();
             boolean pressed = evt.isPressed();
             boolean released = evt.isReleased();
             boolean repeating = evt.isRepeating();
+            
+            System.out.println("KeyCode "+keyCode+" isPressed? "+ pressed + " isReleased? "+ released);
         }
 
         @Override
@@ -887,5 +863,323 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
             //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
         
+    }
+    
+    // Method to manually set a pose frame
+    protected void setFramePose(){
+        human.rootBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(0 * FastMath.DEG_TO_RAD, Vector3f.UNIT_X)  ,Vector3f.UNIT_XYZ);
+        human.lHipBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(45 * FastMath.DEG_TO_RAD, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
+        human.lKneeBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(0 * FastMath.DEG_TO_RAD, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
+        human.lAnkleBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(0 * FastMath.DEG_TO_RAD, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
+        human.rHipBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(-45 * FastMath.DEG_TO_RAD, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
+        human.rKneeBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(0 * FastMath.DEG_TO_RAD, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
+        human.rAnkleBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(0 * FastMath.DEG_TO_RAD, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
+        human.waistBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(0 * FastMath.DEG_TO_RAD, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
+        human.torsoBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(0 * FastMath.DEG_TO_RAD, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
+        human.chestBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(0 * FastMath.DEG_TO_RAD, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
+        human.lShoulderBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(-30 * FastMath.DEG_TO_RAD, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
+        human.lElbowBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(0 * FastMath.DEG_TO_RAD, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
+        human.lWristBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(0 * FastMath.DEG_TO_RAD, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
+        human.rShoulderBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(30 * FastMath.DEG_TO_RAD, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
+        human.rElbowBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(0 * FastMath.DEG_TO_RAD, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
+        human.rWristBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(0 * FastMath.DEG_TO_RAD, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
+        human.headBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(0 * FastMath.DEG_TO_RAD, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
+    }
+    
+    // File input
+    public void readDataFile(){
+        File file= new File("C:\\Users\\TigerSage\\Documents\\JavaProjects\\BasicGamePlayGround\\assets\\Models\\Maplet\\ConversionMap\\conversionTestMap2.x");
+        
+        try {
+            Scanner sc = new Scanner(file);
+            // Keep track of how many lines read
+            int lineCounter = 0;
+            int splitCounter = 0;
+            
+            // This loop reads every line of the file
+            while(sc.hasNextLine()){
+                // Read the line
+                String line = sc.nextLine();
+                lineCounter++;
+                
+                // Split into empty character terminals
+                String[] split = line.split(" ");
+                splitCounter = split.length;
+                
+                // Print the line
+                System.out.println(lineCounter +": "+ line);
+                
+                // Parse the line...
+                
+                // XOF tag - VALIDATES .X FILE FORMAT
+                //if("xof".equals(split[0]))
+                
+                
+                int numPoseFrames = 0;
+                if("Validation".equals(split[0])){
+                    
+                    if("PoseFrame".equals(split[1])){
+                        String itemCountData[] = split[2].split(":");
+                        numPoseFrames = Integer.getInteger(itemCountData[1]);
+                        poseFrames.clear();
+                    }
+                    
+                }if("PoseFrame".equals(split[0])){
+                    PoseFrame frame = new PoseFrame();
+                    frame.readPoseFrame(sc);
+                }if("Animation".equals(split[0])){
+                    // NOT IMPLEMENTED YET
+                }
+                
+            }
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(AnimationEditor_Dev.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }
+    
+    protected void readFrameData(){
+        try {
+            InputStreamReader reader = new InputStreamReader(new FileInputStream("MyFile.txt"), "UTF-16");
+            BufferedReader bufferedReader = new BufferedReader(reader);
+ 
+            String line;
+ 
+            // Read the file contents
+            //while ((line = bufferedReader.readLine()) != null) {
+            //    System.out.println(line);
+            //}
+            
+            line = bufferedReader.readLine();
+            System.out.println(line);
+            if(line.equals("FrameData")){
+                String[] quatData;
+                // If the first line checks out, grab our rotation data
+                line = bufferedReader.readLine();
+                quatData = line.split(",");
+                System.out.println(line);
+                System.out.println(quatData.length);
+                System.out.println(quatData[1]);
+                human.rootBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngles(Float.parseFloat(quatData[1]), Float.parseFloat(quatData[2]), Float.parseFloat(quatData[3])), Vector3f.UNIT_XYZ);
+                
+                line = bufferedReader.readLine();
+                quatData = line.split(",");
+                System.out.println(line);
+                System.out.println(quatData.length);
+                System.out.println(quatData[1]);
+                human.lHipBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngles(Float.parseFloat(quatData[1].trim()), Float.parseFloat(quatData[2].trim()), Float.parseFloat(quatData[3].trim())), Vector3f.UNIT_XYZ);
+                
+                line = bufferedReader.readLine();
+                quatData = line.split(",");
+                System.out.println(line);
+                human.lKneeBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngles(Float.parseFloat(quatData[1]), Float.parseFloat(quatData[2]), Float.parseFloat(quatData[3])), Vector3f.UNIT_XYZ);
+                
+                line = bufferedReader.readLine();
+                quatData = line.split(",");
+                System.out.println(line);
+                human.lAnkleBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngles(Float.parseFloat(quatData[1]), Float.parseFloat(quatData[2]), Float.parseFloat(quatData[3])), Vector3f.UNIT_XYZ);
+                
+                line = bufferedReader.readLine();
+                quatData = line.split(",");
+                System.out.println(line);
+                human.rHipBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngles(Float.parseFloat(quatData[1]), Float.parseFloat(quatData[2]), Float.parseFloat(quatData[3])), Vector3f.UNIT_XYZ);
+                
+                line = bufferedReader.readLine();
+                quatData = line.split(",");
+                System.out.println(line);
+                human.rKneeBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngles(Float.parseFloat(quatData[1]), Float.parseFloat(quatData[2]), Float.parseFloat(quatData[3])), Vector3f.UNIT_XYZ);
+                
+                line = bufferedReader.readLine();
+                quatData = line.split(",");
+                System.out.println(line);
+                human.rAnkleBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngles(Float.parseFloat(quatData[1]), Float.parseFloat(quatData[2]), Float.parseFloat(quatData[3])), Vector3f.UNIT_XYZ);
+                
+                line = bufferedReader.readLine();
+                quatData = line.split(",");
+                System.out.println(line);
+                human.waistBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngles(Float.parseFloat(quatData[1]), Float.parseFloat(quatData[2]), Float.parseFloat(quatData[3])), Vector3f.UNIT_XYZ);
+                
+                line = bufferedReader.readLine();
+                quatData = line.split(",");
+                System.out.println(line);
+                human.torsoBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngles(Float.parseFloat(quatData[1]), Float.parseFloat(quatData[2]), Float.parseFloat(quatData[3])), Vector3f.UNIT_XYZ);
+                
+                line = bufferedReader.readLine();
+                quatData = line.split(",");
+                System.out.println(line);
+                human.chestBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngles(Float.parseFloat(quatData[1]), Float.parseFloat(quatData[2]), Float.parseFloat(quatData[3])), Vector3f.UNIT_XYZ);
+                
+                line = bufferedReader.readLine();
+                quatData = line.split(",");
+                System.out.println(line);
+                human.lShoulderBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngles(Float.parseFloat(quatData[1]), Float.parseFloat(quatData[2]), Float.parseFloat(quatData[3])), Vector3f.UNIT_XYZ);
+                
+                line = bufferedReader.readLine();
+                quatData = line.split(",");
+                System.out.println(line);
+                human.lElbowBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngles(Float.parseFloat(quatData[1]), Float.parseFloat(quatData[2]), Float.parseFloat(quatData[3])), Vector3f.UNIT_XYZ);
+                
+                line = bufferedReader.readLine();
+                quatData = line.split(",");
+                System.out.println(line);
+                human.lWristBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngles(Float.parseFloat(quatData[1]), Float.parseFloat(quatData[2]), Float.parseFloat(quatData[3])), Vector3f.UNIT_XYZ);
+                
+                line = bufferedReader.readLine();
+                quatData = line.split(",");
+                System.out.println(line);
+                human.rShoulderBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngles(Float.parseFloat(quatData[1]), Float.parseFloat(quatData[2]), Float.parseFloat(quatData[3])), Vector3f.UNIT_XYZ);
+                
+                line = bufferedReader.readLine();
+                quatData = line.split(",");
+                System.out.println(line);
+                human.rElbowBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngles(Float.parseFloat(quatData[1]), Float.parseFloat(quatData[2]), Float.parseFloat(quatData[3])), Vector3f.UNIT_XYZ);
+                
+                line = bufferedReader.readLine();
+                quatData = line.split(",");
+                System.out.println(line);
+                human.rWristBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngles(Float.parseFloat(quatData[1]), Float.parseFloat(quatData[2]), Float.parseFloat(quatData[3])), Vector3f.UNIT_XYZ);
+                
+                line = bufferedReader.readLine();
+                quatData = line.split(",");
+                System.out.println(line);
+                human.headBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngles(Float.parseFloat(quatData[1]), Float.parseFloat(quatData[2]), Float.parseFloat(quatData[3])), Vector3f.UNIT_XYZ);
+                
+            }else if(line.equals("KeyFrameData")){
+                
+            }else{
+                reader.close();
+                return;
+            }
+            
+            reader.close();
+ 
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    // File output
+    public void writeDataFile(){
+        try {
+            FileWriter myWriter = new FileWriter("filename.txt");
+            // Example
+            //myWriter.write("Files in Java might be tricky, but it is fun enough!");
+            
+            // Write the pose frames first
+            int size = poseFrames.size();
+            myWriter.write("Validation PoseFrame itemCount:"+size);
+            for(int pF = 0; pF < size; pF++){
+                PoseFrame frame = poseFrames.get(pF);
+                // Write PoseFrame Header
+                myWriter.write("PoseFrame");
+                frame.writePoseFrame(myWriter);
+            }
+            
+            // After the pose frames, write the animations
+            
+            // Close the file
+            myWriter.close();
+            
+            System.out.println("Successfully wrote to the file.");
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
+    }
+    
+    protected void writeFrameData(){
+        try {
+            FileOutputStream outputStream = new FileOutputStream("MyFile.txt");
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream, "UTF-16");
+            BufferedWriter bufferedWriter = new BufferedWriter(outputStreamWriter);
+             
+            // Write file contents
+            //bufferedWriter.write("Xin chào");
+            //bufferedWriter.newLine();
+            //bufferedWriter.write("Hẹn gặp lại!");
+            //bufferedWriter.newLine();
+            bufferedWriter.write("FrameData");
+            bufferedWriter.newLine();
+            Quaternion rRot = human.rootBone.getLocalRotation();
+            
+            Quaternion lHRot = human.lHipBone.getLocalRotation();
+            Quaternion lKRot = human.lKneeBone.getLocalRotation();
+            Quaternion lARot = human.lAnkleBone.getLocalRotation();
+            
+            Quaternion rHRot = human.rHipBone.getLocalRotation();
+            Quaternion rKRot = human.rKneeBone.getLocalRotation();
+            Quaternion rARot = human.rAnkleBone.getLocalRotation();
+            
+            Quaternion wRot = human.waistBone.getLocalRotation();
+            Quaternion tRot = human.torsoBone.getLocalRotation();
+            Quaternion cRot = human.chestBone.getLocalRotation();
+            
+            Quaternion lSRot = human.lShoulderBone.getLocalRotation();
+            Quaternion lERot = human.lElbowBone.getLocalRotation();
+            Quaternion lWRot = human.lWristBone.getLocalRotation();
+            
+            Quaternion rSRot = human.rShoulderBone.getLocalRotation();
+            Quaternion rERot = human.rElbowBone.getLocalRotation();
+            Quaternion rWRot = human.rWristBone.getLocalRotation();
+            
+            Quaternion hRot = human.headBone.getLocalRotation();
+            
+            float[] angles = new float[3];
+            
+            rRot.toAngles(angles);
+            bufferedWriter.write(0 +"," +Float.toString(angles[0]*FastMath.RAD_TO_DEG)+ "," +Float.toString(angles[1]*FastMath.RAD_TO_DEG)+","+Float.toString(angles[2]*FastMath.RAD_TO_DEG));
+            bufferedWriter.newLine();
+            lHRot.toAngles(angles);
+            bufferedWriter.write(1 +"," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            bufferedWriter.newLine();
+            lKRot.toAngles(angles);
+            bufferedWriter.write(2 +"," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            bufferedWriter.newLine();
+            lARot.toAngles(angles);
+            bufferedWriter.write(3 +"," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            bufferedWriter.newLine();
+            rHRot.toAngles(angles);
+            bufferedWriter.write(4 +"," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            bufferedWriter.newLine();
+            rKRot.toAngles(angles);
+            bufferedWriter.write(5 +"," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            bufferedWriter.newLine();
+            rARot.toAngles(angles);
+            bufferedWriter.write(6 +"," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            bufferedWriter.newLine();
+            wRot.toAngles(angles);
+            bufferedWriter.write(7 +"," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            bufferedWriter.newLine();
+            tRot.toAngles(angles);
+            bufferedWriter.write(8 +"," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            bufferedWriter.newLine();
+            cRot.toAngles(angles);
+            bufferedWriter.write(9 +"," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            bufferedWriter.newLine();
+            lSRot.toAngles(angles);
+            bufferedWriter.write(10 +"," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            bufferedWriter.newLine();
+            lERot.toAngles(angles);
+            bufferedWriter.write(11 +"," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            bufferedWriter.newLine();
+            lWRot.toAngles(angles);
+            bufferedWriter.write(12 +"," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            bufferedWriter.newLine();
+            rSRot.toAngles(angles);
+            bufferedWriter.write(13 +"," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            bufferedWriter.newLine();
+            rERot.toAngles(angles);
+            bufferedWriter.write(14 +"," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            bufferedWriter.newLine();
+            rWRot.toAngles(angles);
+            bufferedWriter.write(15 +"," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            bufferedWriter.newLine();
+            hRot.toAngles(angles);
+            bufferedWriter.write(16 +"," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            bufferedWriter.newLine();
+            bufferedWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
