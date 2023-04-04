@@ -9,6 +9,8 @@ import com.jme3.animation.Bone;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
@@ -282,6 +284,85 @@ public class PoseFrame{
         
     }
     
+    // Prime Prototype Reader
+    public void readPoseFrameData(BufferedReader reader){
+        try {
+            String line;
+            String[] quatData;
+            
+            line = reader.readLine();
+            quatData = line.split(",");
+            rootRotation = new Quaternion().fromAngles(Float.parseFloat(quatData[1])*FastMath.DEG_TO_RAD, Float.parseFloat(quatData[2])*FastMath.DEG_TO_RAD, Float.parseFloat(quatData[3])*FastMath.DEG_TO_RAD);
+            
+            line = reader.readLine();
+            quatData = line.split(",");
+            lHipRotation = new Quaternion().fromAngles(Float.parseFloat(quatData[1])*FastMath.DEG_TO_RAD, Float.parseFloat(quatData[2])*FastMath.DEG_TO_RAD, Float.parseFloat(quatData[3])*FastMath.DEG_TO_RAD);
+            
+            line = reader.readLine();
+            quatData = line.split(",");
+            lKneeRotation = new Quaternion().fromAngles(Float.parseFloat(quatData[1])*FastMath.DEG_TO_RAD, Float.parseFloat(quatData[2])*FastMath.DEG_TO_RAD, Float.parseFloat(quatData[3])*FastMath.DEG_TO_RAD);
+            
+            line = reader.readLine();
+            quatData = line.split(",");
+            lAnkleRotation = new Quaternion().fromAngles(Float.parseFloat(quatData[1])*FastMath.DEG_TO_RAD, Float.parseFloat(quatData[2])*FastMath.DEG_TO_RAD, Float.parseFloat(quatData[3])*FastMath.DEG_TO_RAD);
+            
+            line = reader.readLine();
+            quatData = line.split(",");
+            rHipRotation = new Quaternion().fromAngles(Float.parseFloat(quatData[1])*FastMath.DEG_TO_RAD, Float.parseFloat(quatData[2])*FastMath.DEG_TO_RAD, Float.parseFloat(quatData[3])*FastMath.DEG_TO_RAD);
+            
+            line = reader.readLine();
+            quatData = line.split(",");
+            rKneeRotation = new Quaternion().fromAngles(Float.parseFloat(quatData[1])*FastMath.DEG_TO_RAD, Float.parseFloat(quatData[2])*FastMath.DEG_TO_RAD, Float.parseFloat(quatData[3])*FastMath.DEG_TO_RAD);
+            
+            line = reader.readLine();
+            quatData = line.split(",");
+            rAnkleRotation = new Quaternion().fromAngles(Float.parseFloat(quatData[1])*FastMath.DEG_TO_RAD, Float.parseFloat(quatData[2])*FastMath.DEG_TO_RAD, Float.parseFloat(quatData[3])*FastMath.DEG_TO_RAD);
+            
+            line = reader.readLine();
+            quatData = line.split(",");
+            waistRotation = new Quaternion().fromAngles(Float.parseFloat(quatData[1])*FastMath.DEG_TO_RAD, Float.parseFloat(quatData[2])*FastMath.DEG_TO_RAD, Float.parseFloat(quatData[3])*FastMath.DEG_TO_RAD);
+            
+            line = reader.readLine();
+            quatData = line.split(",");
+            torsoRotation = new Quaternion().fromAngles(Float.parseFloat(quatData[1])*FastMath.DEG_TO_RAD, Float.parseFloat(quatData[2])*FastMath.DEG_TO_RAD, Float.parseFloat(quatData[3])*FastMath.DEG_TO_RAD);
+            
+            line = reader.readLine();
+            quatData = line.split(",");
+            chestRotation = new Quaternion().fromAngles(Float.parseFloat(quatData[1])*FastMath.DEG_TO_RAD, Float.parseFloat(quatData[2])*FastMath.DEG_TO_RAD, Float.parseFloat(quatData[3])*FastMath.DEG_TO_RAD);
+            
+            line = reader.readLine();
+            quatData = line.split(",");
+            lShoulderRotation = new Quaternion().fromAngles(Float.parseFloat(quatData[1])*FastMath.DEG_TO_RAD, Float.parseFloat(quatData[2])*FastMath.DEG_TO_RAD, Float.parseFloat(quatData[3])*FastMath.DEG_TO_RAD);
+            
+            line = reader.readLine();
+            quatData = line.split(",");
+            lElbowRotation = new Quaternion().fromAngles(Float.parseFloat(quatData[1])*FastMath.DEG_TO_RAD, Float.parseFloat(quatData[2])*FastMath.DEG_TO_RAD, Float.parseFloat(quatData[3])*FastMath.DEG_TO_RAD);
+            
+            line = reader.readLine();
+            quatData = line.split(",");
+            lWristRotation = new Quaternion().fromAngles(Float.parseFloat(quatData[1])*FastMath.DEG_TO_RAD, Float.parseFloat(quatData[2])*FastMath.DEG_TO_RAD, Float.parseFloat(quatData[3])*FastMath.DEG_TO_RAD);
+            
+            line = reader.readLine();
+            quatData = line.split(",");
+            rShoulderRotation = new Quaternion().fromAngles(Float.parseFloat(quatData[1])*FastMath.DEG_TO_RAD, Float.parseFloat(quatData[2])*FastMath.DEG_TO_RAD, Float.parseFloat(quatData[3])*FastMath.DEG_TO_RAD);
+            
+            line = reader.readLine();
+            quatData = line.split(",");
+            rElbowRotation = new Quaternion().fromAngles(Float.parseFloat(quatData[1])*FastMath.DEG_TO_RAD, Float.parseFloat(quatData[2])*FastMath.DEG_TO_RAD, Float.parseFloat(quatData[3])*FastMath.DEG_TO_RAD);
+            
+            line = reader.readLine();
+            quatData = line.split(",");
+            rWristRotation = new Quaternion().fromAngles(Float.parseFloat(quatData[1])*FastMath.DEG_TO_RAD, Float.parseFloat(quatData[2])*FastMath.DEG_TO_RAD, Float.parseFloat(quatData[3])*FastMath.DEG_TO_RAD);
+            
+            line = reader.readLine();
+            quatData = line.split(",");
+            headRotation = new Quaternion().fromAngles(Float.parseFloat(quatData[1])*FastMath.DEG_TO_RAD, Float.parseFloat(quatData[2])*FastMath.DEG_TO_RAD, Float.parseFloat(quatData[3])*FastMath.DEG_TO_RAD);
+            
+        } catch (IOException ex) {
+            Logger.getLogger(PoseFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
     protected void readPoseFrameRotation(float[] rot, int index){
         switch(index){
             case 0:
@@ -360,6 +441,69 @@ public class PoseFrame{
             myWriter.write("Rotation RElbow "+rElbowRot[0]+" "+rElbowRot[1]+" "+rElbowRot[2]);
             myWriter.write("Rotation RWrist "+rWristRot[0]+" "+rWristRot[1]+" "+rWristRot[2]);
             myWriter.write("Rotation Head "+headRot[0]+" "+headRot[1]+" "+headRot[2]);
+        } catch (IOException ex) {
+            Logger.getLogger(PoseFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    // Prime Prototype Writer
+    public void writePoseFrameData(BufferedWriter writer){
+        try {
+            writer.write("PoseFrameData");
+            writer.newLine();
+            
+            float[] angles = new float[3];
+            
+            rootRotation.toAngles(angles);
+            writer.write("Rotation Root," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            
+            lHipRotation.toAngles(angles);
+            writer.write("Rotation LHip," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            
+            lKneeRotation.toAngles(angles);
+            writer.write("Rotation LKnee," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            
+            lAnkleRotation.toAngles(angles);
+            writer.write("Rotation LAnkle," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            
+            rHipRotation.toAngles(angles);
+            writer.write("Rotation RHip," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            
+            rKneeRotation.toAngles(angles);
+            writer.write("Rotation RKnee," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            
+            rAnkleRotation.toAngles(angles);
+            writer.write("Rotation RAnkle," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            
+            waistRotation.toAngles(angles);
+            writer.write("Rotation Waist," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            
+            torsoRotation.toAngles(angles);
+            writer.write("Rotation Torso," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            
+            chestRotation.toAngles(angles);
+            writer.write("Rotation Chest," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            
+            lShoulderRotation.toAngles(angles);
+            writer.write("Rotation LShoulder," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            
+            lElbowRotation.toAngles(angles);
+            writer.write("Rotation LElbow," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            
+            lWristRotation.toAngles(angles);
+            writer.write("Rotation LWrist," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            
+            rShoulderRotation.toAngles(angles);
+            writer.write("Rotation RShoulder," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            
+            rElbowRotation.toAngles(angles);
+            writer.write("Rotation RElbow," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            
+            rWristRotation.toAngles(angles);
+            writer.write("Rotation RWrist," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
+            
+            headRotation.toAngles(angles);
+            writer.write("Rotation Head," +(angles[0]*FastMath.RAD_TO_DEG)+ "," +(angles[1]*FastMath.RAD_TO_DEG)+","+(angles[2]*FastMath.RAD_TO_DEG));
         } catch (IOException ex) {
             Logger.getLogger(PoseFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
