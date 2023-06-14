@@ -13,12 +13,10 @@ import com.jme3.animation.AnimControl;
 import com.jme3.animation.AnimEventListener;
 import com.jme3.animation.Animation;
 import com.jme3.animation.Bone;
-import com.jme3.animation.Skeleton;
 import com.jme3.animation.SkeletonControl;
 import com.jme3.app.SimpleApplication;
 import com.jme3.collision.CollisionResults;
 import com.jme3.font.BitmapText;
-import com.jme3.input.JoystickButton;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
 import com.jme3.input.RawInputListener;
@@ -43,22 +41,9 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.debug.SkeletonDebugger;
 import com.jme3.scene.shape.Sphere;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
-import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -104,10 +89,7 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         
         // Manipulate the frame's time value
         FrameTimePos,
-        FrameTimeNeg,
-        
-        // Toggle typing keyboard mode
-        TypingKeyboardToggle
+        FrameTimeNeg
     }
     
     // We need a mutable list of PoseFrames
@@ -121,13 +103,9 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
     BitmapText valueText;
     BitmapText rotationText;
     
-    // Input latch toggles
     boolean moveLeft, moveRight, moveUp, moveDown, rotateLeft, rotateRight, mouseSelect;
     boolean rotateBonePos, rotateBoneNeg, selectAxisX, selectAxisY, selectAxisZ;
     boolean rotateValueIncr, rotateValueDecr, nextPoseFrame, prevPoseFrame;
-    boolean typingKeyboardToggle;
-    
-    // Cam position data
     private Vector3f camLocation = new Vector3f(0,20,0);
     private Vector3f lookAtDirection = new Vector3f(0,-0.8f,-0.2f);
     private float camDistance = 10;
@@ -193,33 +171,30 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         
         // Test animation creation cycle
         // TODO: Create the means to build animation data from pose data
-        HumanoidRunAnimationData anim = new HumanoidRunAnimationData();
+        /* HumanoidRunAnimationData anim = new HumanoidRunAnimationData();
         anim.prepareBoneTracks();
         control.addAnim(anim.animation);
         control.addListener(this);
         animChannel = control.createChannel();
-        //animChannel.setAnim("Test");
+        //animChannel.setAnim("Test"); 
         
         
         Animation anim1 = control.getAnim("Test");
-        System.out.println("Animation name" +anim1.getName());
+        System.out.println("Animation name" +anim1.getName()); */
         
         // Input mappings
         addInputMappings();
+        
         createSelectionSkeleton();
         
         // Create the pose frame array
         createPoseFrameTimeline();
         
-        //
+        // Grabs bone rotation data and stores it in arrays
         getBoneData();
         
-        // Add a raw listener because it's eisier to get all joystick events
-        // this way.
-        inputManager.addRawInputListener( new KeyboardController() );
-        
         // Create a primitive HUD
-        // First line for the axis selection
+        // First line for the bone selection
         boneText = new BitmapText(guiFont, false);
         boneText.setSize(guiFont.getCharSet().getRenderedSize());      // font size
         boneText.setColor(ColorRGBA.White);                             // font color
@@ -227,6 +202,7 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         boneText.setLocalTranslation(0, settings.getHeight()/* - hudText.getLineHeight()*/, 0); // position
         guiNode.attachChild(boneText);
         
+        // Second line for the axis selection
         axisText = new BitmapText(guiFont, false);
         axisText.setSize(guiFont.getCharSet().getRenderedSize());      // font size
         axisText.setColor(ColorRGBA.White);                             // font color
@@ -234,6 +210,7 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         axisText.setLocalTranslation(0, settings.getHeight()- axisText.getLineHeight(), 0); // position
         guiNode.attachChild(axisText);
         
+        // Third line for the increment value
         valueText = new BitmapText(guiFont, false);
         valueText.setSize(guiFont.getCharSet().getRenderedSize());      // font size
         valueText.setColor(ColorRGBA.White);                             // font color
@@ -241,6 +218,7 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         valueText.setLocalTranslation(0, settings.getHeight()- (valueText.getLineHeight()*2), 0); // position
         guiNode.attachChild(valueText);
         
+        // Fourth line for the current rotation  value
         rotationText = new BitmapText(guiFont, false);
         rotationText.setSize(guiFont.getCharSet().getRenderedSize());      // font size
         rotationText.setColor(ColorRGBA.White);                             // font color
@@ -254,7 +232,7 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         boolean rotationTextUpdateFlag = false;
         
         // Check for mouse select
-        if(mouseSelect && !typingKeyboardToggle){
+        if(mouseSelect){
             // Collision test for bone-joints
             int bSelect = collideTestSelectionSkeleton();
             
@@ -283,13 +261,13 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         }
         
         // Check bone rotation commands
-        if(rotateBonePos && !typingKeyboardToggle){
+        if(rotateBonePos){
             //parseRotateBoneSelection(axisIncrements[currentAxisIncrement]);
             
             rotateBoneSelection(axisIncrements[currentAxisIncrement]*FastMath.DEG_TO_RAD);
             rotationTextUpdateFlag = true;
             rotateBonePos = false;
-        }if(rotateBoneNeg && !typingKeyboardToggle){
+        }if(rotateBoneNeg){
             //parseRotateBoneSelection(-1*axisIncrements[currentAxisIncrement]);
             
             rotateBoneSelection(-1*axisIncrements[currentAxisIncrement]*FastMath.DEG_TO_RAD);
@@ -298,14 +276,14 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         }
         
         // Manipulate the increment value
-        if(rotateValueIncr && !typingKeyboardToggle){
+        if(rotateValueIncr){
             currentAxisIncrement++;
             if(currentAxisIncrement > (axisIncrements.length-1)){
                 currentAxisIncrement = axisIncrements.length-1;
             }
             valueText.setText("Current Increment Value: " + axisIncrements[currentAxisIncrement]);             // the text
             rotateValueIncr = false;
-        }if(rotateValueDecr && !typingKeyboardToggle){
+        }if(rotateValueDecr){
             currentAxisIncrement--;
             if(currentAxisIncrement < 0){
                 currentAxisIncrement = 0;
@@ -315,37 +293,21 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         }
         
         // Check axis-select commands
-        if(selectAxisX && !typingKeyboardToggle){
+        if(selectAxisX){
             currentAxis = 2;
             axisText.setText("Current axis selection: X"); 
             rotationTextUpdateFlag = true;
             selectAxisX = false;
-        }if(selectAxisY && !typingKeyboardToggle){
+        }if(selectAxisY){
             currentAxis = 0;
             axisText.setText("Current axis selection: Y"); 
             rotationTextUpdateFlag = true;
             selectAxisY = false;
-        }if(selectAxisZ && !typingKeyboardToggle){
+        }if(selectAxisZ){
             currentAxis = 1;
             axisText.setText("Current axis selection: Z"); 
             rotationTextUpdateFlag = true;
             selectAxisZ = false;
-        }if(nextPoseFrame){
-            // Make sure we have a next frame...
-            int pFCount = poseFrames.size();
-            currentPoseFrame++;
-            if(currentPoseFrame > pFCount){
-                currentPoseFrame = pFCount;
-            }
-            nextPoseFrame = false;
-        }if(prevPoseFrame){
-            // Make sure we have a prev frame...
-            int pFCount = poseFrames.size();
-            currentPoseFrame--;
-            if(currentPoseFrame == 0){
-                currentPoseFrame = 1;
-            }
-            prevPoseFrame = false;
         }
         if(rotationTextUpdateFlag){
             Quaternion boneSelectionRotation = getBoneSelectionRotation();
@@ -357,11 +319,9 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
             rotationText.setText("Current Rotation Value: X_" + angles[2] + ", Y_" + angles[0] + ", Z_" + angles[1]);
         }
         
-        if(typingKeyboardToggle){
-            // Get info from typing keyboard to build a string
-        }
     }
     
+    // Called by update - updates the current bone rotation
     private void rotateBoneSelection(float value){
         // Get the bone from the skeleton
         Bone bone = human.skeleton.getBone(currentBoneSelection);
@@ -373,14 +333,17 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         // Convert the quaternion into array (yaw,roll,pitch)
         angles = localRotation.toAngles(angles);
         
+        // TODO - Should we convert to degrees here?
         angles[currentAxis] += value;
         
         localRotation.fromAngles(angles);
         
+        // Update the bone's rotation
+        // TODO - Should we update the bone rotation array table?
         bone.setLocalRotation(localRotation);
     }
     
-    // Grab the rotation data from all bones and store it in arrays
+    // Called by init - Grab the rotation data from all bones and store it in arrays
     private void getBoneData(){
         for(int b = 0; b > 17; b++){
             // Get the bone from the skeleton
@@ -412,6 +375,7 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         return angles;
     }
     
+    // Called by getBoneData()
     private void parseBoneRotation(int bone, float[] value){
         switch(bone){
             case 0:
@@ -470,7 +434,88 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
     
     // Using arrays to update bone rotation
     float[] tempAngles = {0,0,0};
+    private void parseRotateBoneSelection(float value){
+        
+        switch(currentBoneSelection){
+            case 0:
+                rootRot[currentAxis] += value;
+                tempAngles = rootRot;
+                break;
+            case 1:
+                lHipRot[currentAxis] += value;
+                tempAngles = lHipRot;
+                break;
+            case 2:
+                lKneeRot[currentAxis] += value;
+                tempAngles = lKneeRot;
+                break;
+            case 3:
+                lAnkleRot[currentAxis] += value;
+                tempAngles = lAnkleRot;
+                break;
+            case 4:
+                rHipRot[currentAxis] += value;
+                tempAngles = rHipRot;
+                break;
+            case 5:
+                rKneeRot[currentAxis] += value;
+                tempAngles = rKneeRot;
+                break;
+            case 6:
+                rAnkleRot[currentAxis] += value;
+                tempAngles = rAnkleRot;
+                break;
+            case 7:
+                waistRot[currentAxis] += value;
+                tempAngles = waistRot;
+                break;
+            case 8:
+                torsoRot[currentAxis] += value;
+                tempAngles = torsoRot;
+                break;
+            case 9:
+                chestRot[currentAxis] += value;
+                tempAngles = chestRot;
+                break;
+            case 10:
+                lShoulderRot[currentAxis] += value;
+                tempAngles = lShoulderRot;
+                break;
+            case 11:
+                lElbowRot[currentAxis] += value;
+                tempAngles = lElbowRot;
+                break;
+            case 12:
+                lWristRot[currentAxis] += value;
+                tempAngles = lWristRot;
+                break;
+            case 13:
+                rShoulderRot[currentAxis] += value;
+                tempAngles = rShoulderRot;
+                break;
+            case 14:
+                rElbowRot[currentAxis] += value;
+                tempAngles = rElbowRot;
+                break;
+            case 15:
+                rWristRot[currentAxis] += value;
+                tempAngles = rWristRot;
+                break;
+            case 16:
+                headRot[currentAxis] += value;
+                tempAngles = headRot;
+                break;
+            
+        }
+        // Get the bone from the skeleton
+        Bone bone = human.skeleton.getBone(currentBoneSelection);
+        Quaternion localRotation = new Quaternion().fromAngles(convertDegToRad(tempAngles));
+        
+        bone.setLocalRotation(localRotation);
+        
+    }
     
+    // This array table is populated by getBoneData
     float[] rootRot = {0,0,0};
     float[] lHipRot = {0,0,0};
     float[] rHipRot = {0,0,0};
@@ -496,9 +541,28 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         
         return bone.getLocalRotation();
     }
-            
+    
+    private Vector3f getBoneSelectionPosition(){
+        // Get the bone from the skeleton
+        Bone bone = human.skeleton.getBone(currentBoneSelection);
+        // Grab rotation and local position
+        
+        
+        return bone.getLocalPosition();
+    }
+    
+    // Helper function to round floating values
+    private static float round(float value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+
+        BigDecimal bd = new BigDecimal(Double.toString(value));
+        bd = bd.setScale(places, RoundingMode.HALF_UP);
+        return bd.floatValue();
+    }
+    
+    // Called by init - creates selection markers for joints
     private void createSelectionSkeleton(){
-        SkeletonControl control = human.model.getControl(SkeletonControl.class);
+        SkeletonControl skelControl = human.model.getControl(SkeletonControl.class);
         int boneCount = human.skeleton.getBoneCount();
         
         selectionMatSelected = assetManager.loadMaterial("Materials/DevMaterial_LightGrey.j3m");
@@ -512,7 +576,7 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         System.out.println("Num bones: "+ human.skeleton.getBoneCount());
         for(int b = 0; b < boneCount; b++){
             selectionBones[b] = human.skeleton.getBone(b);
-            selectionBoneNodes[b] = control.getAttachmentsNode(selectionBones[b].getName());
+            selectionBoneNodes[b] = skelControl.getAttachmentsNode(selectionBones[b].getName());
             selectionGeometries[b] = new Geometry(selectionBones[b].getName(), selectionMesh); // wrap shape into geometry
             selectionGeometries[b].setMaterial(selectionMatDeselected);
             selectionBoneNodes[b].attachChild(selectionGeometries[b]);
@@ -594,7 +658,7 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         return -1;
     }
     
-    // Create a UI element for the timeline - in dev
+    // Called by init - Create a UI element for the timeline - in dev
     private void createPoseFrameTimeline(){
         poseFrames = new ArrayList();
         currentPoseFrame = 0;
@@ -605,9 +669,11 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         
         newFrame.getBoneData(human);
         poseFrames.add(newFrame);
+        
         currentPoseFrame++;
     }
     
+    // Called by init - setup humanoid ragdoll
     public void createHuman(){
         // Create human
         human = new Humaniod();
@@ -624,6 +690,7 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         human.model.attachChild(geom);
     }
     
+    // Called by init - create a separate skeleton controller for ragdoll
     public void createAnimationSkeleton(){
         SkeletonControl skeletonControl = new SkeletonControl(human.skeleton);
         skeletonControl.setEnabled(true);
@@ -642,6 +709,7 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         human.model.attachChild(skeletonDebug);
     }
     
+    // Called by init - setup flyCam settings
     public void setupCamera(){
         flyCam.setMoveSpeed(25);
         flyCam.setDragToRotate(true);
@@ -649,9 +717,7 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         //flyCam.setEnabled(false);
     }
     
-    // Setup inputs
-    // TODO: Need mappings for rotateUp and rotateDown
-    // TODO: Need triggers for rotation
+    // Called by init - Setup inputs
     private void addInputMappings(){
         /*inputManager.addMapping(InputMapping.MoveDown.name(), new KeyTrigger(KeyInput.KEY_DOWN));
         inputManager.addMapping(InputMapping.MoveUp.name(), new KeyTrigger(KeyInput.KEY_UP));
@@ -682,8 +748,6 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         
         inputManager.addMapping(InputMapping.MouseSelect.name(), new MouseButtonTrigger(MouseInput.BUTTON_RIGHT));
         
-        inputManager.addMapping(InputMapping.TypingKeyboardToggle.name(), new KeyTrigger(KeyInput.KEY_TAB));
-        
         inputManager.addListener(this, InputMapping.RotateBonePos.name(),
                                        InputMapping.RotateBoneNeg.name(),
                                        InputMapping.SelectAxisX.name(),
@@ -698,28 +762,8 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
                                        InputMapping.PrevPoseFrame.name(),
                                        InputMapping.MouseSelect.name(),
                                        InputMapping.FrameTimePos.name(),
-                                       InputMapping.FrameTimeNeg.name(),
-                                       InputMapping.TypingKeyboardToggle.name()
+                                       InputMapping.FrameTimeNeg.name()
         );
-    }
-    
-    protected void removeInputMappings(){
-        inputManager.deleteTrigger(InputMapping.RotateBonePos.name(), new KeyTrigger(KeyInput.KEY_PERIOD));
-        inputManager.deleteTrigger(InputMapping.RotateBoneNeg.name(), new KeyTrigger(KeyInput.KEY_COMMA));
-        inputManager.deleteTrigger(InputMapping.SelectAxisX.name(), new KeyTrigger(KeyInput.KEY_J));
-        inputManager.deleteTrigger(InputMapping.SelectAxisY.name(), new KeyTrigger(KeyInput.KEY_K));
-        inputManager.deleteTrigger(InputMapping.SelectAxisZ.name(), new KeyTrigger(KeyInput.KEY_L));
-        inputManager.deleteTrigger(InputMapping.CreatePoseFrame.name(), new KeyTrigger(KeyInput.KEY_DOWN));
-        inputManager.deleteTrigger(InputMapping.EditPoseFrame.name(), new KeyTrigger(KeyInput.KEY_UP));
-        inputManager.deleteTrigger(InputMapping.DeletePoseFrame.name(), new KeyTrigger(KeyInput.KEY_LEFT));
-        inputManager.deleteTrigger(InputMapping.RotateValueIncr.name(), new KeyTrigger(KeyInput.KEY_U));
-        inputManager.deleteTrigger(InputMapping.RotateValueDecr.name(), new KeyTrigger(KeyInput.KEY_I));
-        inputManager.deleteTrigger(InputMapping.NextPoseFrame.name(), new KeyTrigger(KeyInput.KEY_O));
-        inputManager.deleteTrigger(InputMapping.PrevPoseFrame.name(), new KeyTrigger(KeyInput.KEY_P));
-        inputManager.deleteTrigger(InputMapping.FrameTimePos.name(), new KeyTrigger(KeyInput.KEY_N));
-        inputManager.deleteTrigger(InputMapping.FrameTimeNeg.name(), new KeyTrigger(KeyInput.KEY_M));
-        inputManager.deleteTrigger(InputMapping.MouseSelect.name(), new MouseButtonTrigger(MouseInput.BUTTON_RIGHT));
-        //inputManager.deleteTrigger(InputMapping.TypingKeyboardToggle.name(), new KeyTrigger(KeyInput.KEY_PERIOD));
     }
     
     // Input mappings send events here
@@ -786,13 +830,6 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
                 // Perform ray-cast testing for bone-joint intersection
                 mouseSelect = isPressed;
                 break;
-                
-            case TypingKeyboardToggle:
-                if(isPressed){
-                    typingKeyboardToggle =! typingKeyboardToggle;
-                }
-                
-                break;
         }
     }
     
@@ -812,7 +849,6 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
-    // Raw input listener for typing keyboard
     public class KeyboardController implements RawInputListener{
 
         @Override
@@ -848,14 +884,12 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
         @Override
         public void onKeyEvent(KeyInputEvent evt) {
             // Grab keyboard presses here
-            //System.out.println(textRed+"Key Input Event"+textReset);
+            System.out.println(textRed+"Key Input Event"+textReset);
 
             int keyCode = evt.getKeyCode();
             boolean pressed = evt.isPressed();
             boolean released = evt.isReleased();
             boolean repeating = evt.isRepeating();
-            
-            System.out.println("KeyCode "+keyCode+" isPressed? "+ pressed + " isReleased? "+ released);
         }
 
         @Override
@@ -863,181 +897,5 @@ public class AnimationEditor_Dev extends SimpleApplication implements ActionList
             //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
         
-    }
-    
-    // Method to manually set a pose frame
-    protected void setFramePose(){
-        human.rootBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(0 * FastMath.DEG_TO_RAD, Vector3f.UNIT_X)  ,Vector3f.UNIT_XYZ);
-        human.lHipBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(45 * FastMath.DEG_TO_RAD, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
-        human.lKneeBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(0 * FastMath.DEG_TO_RAD, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
-        human.lAnkleBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(0 * FastMath.DEG_TO_RAD, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
-        human.rHipBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(-45 * FastMath.DEG_TO_RAD, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
-        human.rKneeBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(0 * FastMath.DEG_TO_RAD, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
-        human.rAnkleBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(0 * FastMath.DEG_TO_RAD, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
-        human.waistBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(0 * FastMath.DEG_TO_RAD, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
-        human.torsoBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(0 * FastMath.DEG_TO_RAD, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
-        human.chestBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(0 * FastMath.DEG_TO_RAD, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
-        human.lShoulderBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(-30 * FastMath.DEG_TO_RAD, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
-        human.lElbowBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(0 * FastMath.DEG_TO_RAD, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
-        human.lWristBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(0 * FastMath.DEG_TO_RAD, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
-        human.rShoulderBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(30 * FastMath.DEG_TO_RAD, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
-        human.rElbowBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(0 * FastMath.DEG_TO_RAD, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
-        human.rWristBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(0 * FastMath.DEG_TO_RAD, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
-        human.headBone.setUserTransforms(Vector3f.ZERO, new Quaternion().fromAngleAxis(0 * FastMath.DEG_TO_RAD, Vector3f.UNIT_X),Vector3f.UNIT_XYZ);
-    }
-    
-    // File input
-    public void readDataFile(){
-        File file= new File("C:\\Users\\TigerSage\\Documents\\JavaProjects\\BasicGamePlayGround\\assets\\Models\\Maplet\\ConversionMap\\conversionTestMap2.x");
-        
-        try {
-            Scanner sc = new Scanner(file);
-            // Keep track of how many lines read
-            int lineCounter = 0;
-            int splitCounter = 0;
-            
-            // This loop reads every line of the file
-            while(sc.hasNextLine()){
-                // Read the line
-                String line = sc.nextLine();
-                lineCounter++;
-                
-                // Split into empty character terminals
-                String[] split = line.split(" ");
-                splitCounter = split.length;
-                
-                // Print the line
-                System.out.println(lineCounter +": "+ line);
-                
-                // Parse the line...
-                
-                // XOF tag - VALIDATES .X FILE FORMAT
-                //if("xof".equals(split[0]))
-                
-                
-                int numPoseFrames = 0;
-                if("Validation".equals(split[0])){
-                    
-                    if("PoseFrame".equals(split[1])){
-                        String itemCountData[] = split[2].split(":");
-                        numPoseFrames = Integer.getInteger(itemCountData[1]);
-                        poseFrames.clear();
-                    }
-                    
-                }if("PoseFrame".equals(split[0])){
-                    PoseFrame frame = new PoseFrame();
-                    frame.readPoseFrame(sc);
-                }if("Animation".equals(split[0])){
-                    // NOT IMPLEMENTED YET
-                }
-                
-            }
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(AnimationEditor_Dev.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-    }
-    
-    // Prime Prototype Reader
-    protected void readFrameData(){
-        boolean success = false;
-        ArrayList<PoseFrame> tempFrames = new ArrayList<>();
-        
-        try {
-            InputStreamReader reader = new InputStreamReader(new FileInputStream("MyFile.txt"), "UTF-16");
-            BufferedReader bufferedReader = new BufferedReader(reader);
- 
-            String line;
-            String[] quatData;
- 
-            // Read the file contents
-            while ((line = bufferedReader.readLine()) != null) {
-                
-                // Get the next line
-                line = bufferedReader.readLine();
-                // Split the line into tokens
-                quatData = line.split(",");
-                System.out.println(line);
-                
-                
-                
-                if(line.equals("FrameData")){
-                    
-                    // If the first line checks out, grab our rotation data
-                    
-                    PoseFrame frame = new PoseFrame();
-                    frame.readPoseFrameData(bufferedReader);
-                    tempFrames.add(frame);
-                }else if(line.equals("KeyFrameData")){
-
-                }
-                
-                
-                
-                System.out.println(line);
-            }
-            // If we've made it this far, add the frames
-            poseFrames.clear();
-            poseFrames.addAll(tempFrames);
-            
-            
-            reader.close();
- 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    
-    // File output
-    public void writeDataFile(){
-        try {
-            FileWriter myWriter = new FileWriter("filename.txt");
-            // Example
-            //myWriter.write("Files in Java might be tricky, but it is fun enough!");
-            
-            // Write the pose frames first
-            int size = poseFrames.size();
-            myWriter.write("Validation PoseFrame itemCount:"+size);
-            for(int pF = 0; pF < size; pF++){
-                PoseFrame frame = poseFrames.get(pF);
-                // Write PoseFrame Header
-                myWriter.write("PoseFrame");
-                frame.writePoseFrame(myWriter);
-            }
-            
-            // After the pose frames, write the animations
-            
-            // Close the file
-            myWriter.close();
-            
-            System.out.println("Successfully wrote to the file.");
-        } catch (IOException e) {
-            System.out.println("An error occurred.");
-            e.printStackTrace();
-        }
-    }
-    
-    // Prime Prototype Writer
-    protected void writeFrameData(){
-        try {
-            FileOutputStream outputStream = new FileOutputStream("MyFile.txt");
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream, "UTF-16");
-            BufferedWriter bufferedWriter = new BufferedWriter(outputStreamWriter);
-             
-            // Write file contents
-            //bufferedWriter.write("Xin chào");
-            //bufferedWriter.newLine();
-            //bufferedWriter.write("Hẹn gặp lại!");
-            //bufferedWriter.newLine();
-            
-            // Dump all of our pose frames
-            for(int i = 0; i < poseFrames.size(); i++){
-                poseFrames.get(i).writePoseFrameData(bufferedWriter);
-            }            
-            
-            bufferedWriter.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 }

@@ -78,6 +78,31 @@ public class Humaniod{
     public static byte rWristId = 15;
     public static byte headId = 16;
     
+    public class RotationFrame{
+        // Bone rotations
+        Quaternion rootRotation;
+        Quaternion lHipRotation;
+        Quaternion lKneeRotation;
+        Quaternion lAnkleRotation;
+        Quaternion rHipRotation;
+        Quaternion rKneeRotation;
+        Quaternion rAnkleRotation;
+
+        Quaternion waistRotation;
+        Quaternion torsoRotation;
+        Quaternion chestRotation;
+
+        Quaternion lShoulderRotation;
+        Quaternion lElbowRotation;
+        Quaternion lHandRotation;
+
+        Quaternion rShoulderRotation;
+        Quaternion rElbowRotation;
+        Quaternion rHandRotation;
+
+        Quaternion headRotation;
+    }
+    
     // Bone rotations
     Quaternion rootRotation;
     Quaternion lHipRotation;
@@ -119,6 +144,40 @@ public class Humaniod{
     public Skeleton skeleton;
     public Node model;
     public Mesh mesh;
+    
+    // Use a rotation frame to add a keyframe to a bonetrack
+    public RotationFrame exportRotationFrame(){
+        // Local variables
+        Vector3f localPosition;
+        Quaternion localRotation;
+        
+        RotationFrame frame = new RotationFrame();
+        frame.rootRotation = skeleton.getBone(0).getLocalRotation();
+        
+        frame.lHipRotation = skeleton.getBone(1).getLocalRotation();
+        frame.lKneeRotation = skeleton.getBone(2).getLocalRotation();
+        frame.lAnkleRotation = skeleton.getBone(3).getLocalRotation();
+        
+        frame.rHipRotation = skeleton.getBone(4).getLocalRotation();
+        frame.rKneeRotation = skeleton.getBone(5).getLocalRotation();
+        frame.rAnkleRotation = skeleton.getBone(6).getLocalRotation();
+        
+        frame.waistRotation = skeleton.getBone(7).getLocalRotation();
+        frame.torsoRotation = skeleton.getBone(8).getLocalRotation();
+        frame.chestRotation = skeleton.getBone(9).getLocalRotation();
+        
+        frame.lShoulderRotation = skeleton.getBone(10).getLocalRotation();
+        frame.lElbowRotation = skeleton.getBone(11).getLocalRotation();
+        frame.lHandRotation = skeleton.getBone(12).getLocalRotation();
+        
+        frame.lShoulderRotation = skeleton.getBone(13).getLocalRotation();
+        frame.lElbowRotation = skeleton.getBone(14).getLocalRotation();
+        frame.lHandRotation = skeleton.getBone(15).getLocalRotation();
+        
+        frame.headRotation = skeleton.getBone(16).getLocalRotation();
+        
+        return frame;
+    }
 
     protected void initProtoHumanoidData(){
         protoMesh = new MeshElement();
@@ -1566,28 +1625,28 @@ public class Humaniod{
         // Assin l shoulder verts to bone index 10
         // 56 - 63
         for(int lsi = 56; lsi < 64; lsi++){
-            assignVertexIndex(indices,lsi,lShoulderId);
+            assignVertexIndex(indices,lsi,lElbowId);
             assignVertexWeight(weights,lsi,1);
         }
         
         // Assin l elbow verts to bone index 11
         // 64 - 71
         for(int lei = 64; lei < 72; lei++){
-            assignVertexIndex(indices,lei,lElbowId);
+            assignVertexIndex(indices,lei,lShoulderId);
             assignVertexWeight(weights,lei,1);
         }
         
         // Assin r shoulder verts to bone index 13
         // 72 - 79
         for(int rsi = 72; rsi < 80; rsi++){
-            assignVertexIndex(indices,rsi,rShoulderId);
+            assignVertexIndex(indices,rsi,rElbowId);
             assignVertexWeight(weights,rsi,1);
         }
         
         // Assin r elbow verts to bone index 14
         // 80 - 87
         for(int rei = 80; rei < 88; rei++){
-            assignVertexIndex(indices,rei,rElbowId);
+            assignVertexIndex(indices,rei,rShoulderId);
             assignVertexWeight(weights,rei,1);
         }
         

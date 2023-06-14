@@ -10,7 +10,10 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 
 /**
- *
+ * This is a test example of creating an animation in-code.
+ * 
+ * TODO - implement file save/load
+ * 
  * @author TigerSage
  */
 public class HumanoidRunAnimationData extends HumanoidBoneTrackData{
