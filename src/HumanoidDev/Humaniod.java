@@ -152,29 +152,29 @@ public class Humaniod{
         Quaternion localRotation;
         
         RotationFrame frame = new RotationFrame();
-        frame.rootRotation = skeleton.getBone(0).getLocalRotation();
+        frame.rootRotation = skeleton.getBone(rootId).getLocalRotation();
         
-        frame.lHipRotation = skeleton.getBone(1).getLocalRotation();
-        frame.lKneeRotation = skeleton.getBone(2).getLocalRotation();
-        frame.lAnkleRotation = skeleton.getBone(3).getLocalRotation();
+        frame.lHipRotation = skeleton.getBone(lHipId).getLocalRotation();
+        frame.lKneeRotation = skeleton.getBone(lKneeId).getLocalRotation();
+        frame.lAnkleRotation = skeleton.getBone(lAnkleId).getLocalRotation();
         
-        frame.rHipRotation = skeleton.getBone(4).getLocalRotation();
-        frame.rKneeRotation = skeleton.getBone(5).getLocalRotation();
-        frame.rAnkleRotation = skeleton.getBone(6).getLocalRotation();
+        frame.rHipRotation = skeleton.getBone(rHipId).getLocalRotation();
+        frame.rKneeRotation = skeleton.getBone(rKneeId).getLocalRotation();
+        frame.rAnkleRotation = skeleton.getBone(rAnkleId).getLocalRotation();
         
-        frame.waistRotation = skeleton.getBone(7).getLocalRotation();
-        frame.torsoRotation = skeleton.getBone(8).getLocalRotation();
-        frame.chestRotation = skeleton.getBone(9).getLocalRotation();
+        frame.waistRotation = skeleton.getBone(waistId).getLocalRotation();
+        frame.torsoRotation = skeleton.getBone(torsoId).getLocalRotation();
+        frame.chestRotation = skeleton.getBone(chestId).getLocalRotation();
         
-        frame.lShoulderRotation = skeleton.getBone(10).getLocalRotation();
-        frame.lElbowRotation = skeleton.getBone(11).getLocalRotation();
-        frame.lHandRotation = skeleton.getBone(12).getLocalRotation();
+        frame.lShoulderRotation = skeleton.getBone(lShoulderId).getLocalRotation();
+        frame.lElbowRotation = skeleton.getBone(lElbowId).getLocalRotation();
+        frame.lHandRotation = skeleton.getBone(lWristId).getLocalRotation();
         
-        frame.lShoulderRotation = skeleton.getBone(13).getLocalRotation();
-        frame.lElbowRotation = skeleton.getBone(14).getLocalRotation();
-        frame.lHandRotation = skeleton.getBone(15).getLocalRotation();
+        frame.lShoulderRotation = skeleton.getBone(rShoulderId).getLocalRotation();
+        frame.lElbowRotation = skeleton.getBone(rElbowId).getLocalRotation();
+        frame.lHandRotation = skeleton.getBone(rWristId).getLocalRotation();
         
-        frame.headRotation = skeleton.getBone(16).getLocalRotation();
+        frame.headRotation = skeleton.getBone(headId).getLocalRotation();
         
         return frame;
     }
